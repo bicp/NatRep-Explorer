@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>try{var t=localStorage.getItem("natrep:theme");if(t)document.documentElement.dataset.theme=JSON.parse(t)}catch(e){}</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pure NatRep Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/vendor/leaflet.css">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <span>Pure NatRep Explorer</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <a href="#/country" data-view="country" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>Countries</a>
+      <a href="#/compare" data-view="compare" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Compare</a>
+      <a href="#/locations" data-view="locations" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Zip &amp; radius search</a>
+    </nav>
+    <div class="meta" id="meta"></div>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"></button>
+  </header>
+
+  <!-- COUNTRY -->
+  <main id="view-country" class="view">
+    <aside class="sidebar">
+      <input id="country-filter" type="search" placeholder="Filter countries…" aria-label="Filter countries">
+      <ul id="country-list" class="country-list"></ul>
+    </aside>
+    <section class="content" id="country-content"></section>
+  </main>
+
+  <!-- COMPARE -->
+  <main id="view-compare" class="view single">
+    <section class="content">
+      <div class="toolbar">
+        <h1>Compare countries</h1>
+        <div class="picker">
+          <select id="compare-add" aria-label="Add a country"><option value="">+ Add country…</option></select>
+          <div id="compare-chips" class="chips"></div>
+        </div>
+        <label class="sample">Sample size <input id="compare-n" type="number" min="1" step="50" value="1000"></label>
+        <button id="compare-csv" class="btn ghost">Download CSV</button>
+      </div>
+      <div id="compare-body"></div>
+    </section>
+  </main>
+
+  <!-- LOCATIONS -->
+  <main id="view-locations" class="view loc">
+    <aside class="sidebar wide">
+      <div class="searchbox">
+        <input id="loc-q" type="search" placeholder="City, zip code, region…" aria-label="Search locations" autocomplete="off">
+        <select id="loc-country" aria-label="Country"><option value="">All countries</option></select>
+      </div>
+      <div id="loc-results" class="loc-results">
+        <p class="hint">Search a city, zip code or region, then pick a radius. You can also click anywhere on the map to set the centre.</p>
+      </div>
+    </aside>
+    <section class="loc-main">
+      <div class="radius-bar">
+        <div class="center-label" id="center-label">No centre selected</div>
+        <label>Radius
+          <input id="km-range" type="range" min="1" max="100" value="10">
+          <input id="km" type="number" min="0.5" max="500" step="0.5" value="10"> km
+        </label>
+        <label class="chk"><input id="same-country" type="checkbox" checked> Same country only</label>
+        <button id="run-radius" class="btn" disabled>Find zip codes</button>
+      </div>
+      <div class="loc-split">
+        <div id="map"></div>
+        <div class="loc-table">
+          <div class="loc-summary" id="loc-summary"></div>
+          <div class="table-wrap" id="loc-table"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Pure NatRep Explorer – Nat Rep figures and zip code radius search.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/vendor/leaflet.js"></script>
+  <script src="/static/vendor/chart.umd.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

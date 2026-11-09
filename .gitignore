@@ -1,0 +1,3 @@
+data/*.db
+data/*.xlsx
+__pycache__/

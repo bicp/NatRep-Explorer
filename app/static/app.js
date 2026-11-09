@@ -1,0 +1,420 @@
+/* Pure NatRep Explorer – front end (vanilla JS, Chart.js, Leaflet) */
+(() => {
+  "use strict";
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const api = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText); return r.json(); };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const pct = (v, d = 1) => (v == null || isNaN(v) ? "–" : (v * 100).toFixed(d) + "%");
+  const int = (v) => (v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("en-GB"));
+  const qs = (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== null && v !== undefined && v !== "")).toString();
+  const AGES = ["18-24", "25-34", "35-44", "45-54", "55+"];
+  const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+                  set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
+  const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200); };
+
+  let COUNTRIES = [], META = {};
+  const charts = {};
+  function chart(id, cfg) {
+    if (charts[id]) charts[id].destroy();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const grid = css("--grid"), ink = css("--text-2");
+    Chart.defaults.font.family = css("--font");
+    Chart.defaults.color = ink;
+    cfg.options = Object.assign({ responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {} } } }, cfg.options || {});
+    const sc = cfg.options.scales || {};
+    for (const k of Object.keys(sc)) {
+      sc[k].grid = Object.assign({ color: grid, drawTicks: false }, sc[k].grid || {});
+      sc[k].border = { display: false };
+    }
+    charts[id] = new Chart(el, cfg);
+  }
+  const bar = (color) => ({ backgroundColor: color, borderRadius: 4, borderSkipped: "start", maxBarThickness: 28, borderColor: css("--surface"), borderWidth: { left: 0, right: 0, top: 0, bottom: 0 } });
+  const pctAxis = (axis = "y") => ({ [axis]: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } });
+  const pctTip = { callbacks: { label: (c) => ` ${c.dataset.label ? c.dataset.label + ": " : ""}${c.parsed[c.chart.options.indexAxis === "y" ? "x" : "y"]?.toFixed(1)}%` } };
+  const legend = (items) => `<div class="legend">${items.map(([l, c]) => `<span><i style="background:${c}"></i>${esc(l)}</span>`).join("")}</div>`;
+
+  // ------------------------------------------------------------------ routing
+  function route() {
+    const [, view = "country", arg] = location.hash.split("/");
+    const v = ["country", "compare", "locations"].includes(view) ? view : "country";
+    $$(".view").forEach((el) => el.classList.toggle("active", el.id === "view-" + v));
+    $$(".tabs a").forEach((a) => a.classList.toggle("active", a.dataset.view === v));
+    if (v === "country") showCountry(decodeURIComponent(arg || store.get("country", "Netherlands")));
+    if (v === "compare") renderCompare();
+    if (v === "locations") { initMap(); setTimeout(() => map.invalidateSize(), 50); }
+  }
+  window.addEventListener("hashchange", route);
+
+  // ------------------------------------------------------------------ country view
+  function renderCountryList() {
+    const f = $("#country-filter").value.toLowerCase();
+    const cur = store.get("country", "");
+    $("#country-list").innerHTML = COUNTRIES.filter((c) => c.name.toLowerCase().includes(f) || (c.iso2 || "").toLowerCase() === f)
+      .map((c) => `<li><a href="#/country/${encodeURIComponent(c.name)}" class="${c.name === cur ? "active" : ""}"><span>${esc(c.name)}</span><span class="iso">${esc(c.iso2)}</span></a></li>`).join("");
+  }
+
+  function sampleN() { return Math.max(1, +$("#sample-n")?.value || store.get("n", 1000)); }
+
+  async function showCountry(name) {
+    store.set("country", name);
+    renderCountryList();
+    const box = $("#country-content");
+    let d;
+    try { d = await api("/api/countries/" + encodeURIComponent(name)); }
+    catch (e) { box.innerHTML = `<p class="empty">Couldn't load ${esc(name)}: ${esc(e.message)}</p>`; return; }
+    const N = store.get("n", 1000);
+    const male = d.age_gender.filter((a) => a.gender === "Male"), female = d.age_gender.filter((a) => a.gender === "Female");
+    const mShare = male.reduce((s, a) => s + (a.share || 0), 0);
+    const tert = d.education.find((e) => /^ISCED/.test(e.classification) && /^tertiary/i.test(e.level));
+    const zipInfo = d.zip_sheet ? `${int(d.zip_records)} zip records` : "No zip codes in file";
+
+    box.innerHTML = `
+      <div class="head">
+        <div><h1>${esc(d.name)}</h1>
+          <div class="sub"><span class="tag">${esc(d.iso2 || "")}</span><span class="tag">Layout ${esc(d.layout)}</span><span class="tag">${zipInfo}</span>${d.region_tab ? `<span class="tag">Extra tab: ${esc(d.region_tab)}</span>` : ""}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label class="sample">Sample size <input id="sample-n" type="number" min="1" step="50" value="${N}"></label>
+          <a class="btn ghost" href="#/compare" id="add-compare">Compare…</a>
+        </div>
+      </div>
+      ${d.home_note ? `<div class="note">${esc(d.home_note)}</div>` : ""}
+      ${d.warnings.length ? `<div class="note">Data check: ${esc(d.warnings.join("; "))}</div>` : ""}
+      <div class="kpis">
+        <div class="kpi"><div class="label">Internet penetration</div><div class="value">${pct(d.internet)}</div><div class="foot">${esc(d.internet_src || "")}</div></div>
+        <div class="kpi"><div class="label">Male / Female (18+)</div><div class="value">${pct(mShare)} / ${pct(1 - mShare)}</div><div class="foot">UN WPP 2024</div></div>
+        <div class="kpi"><div class="label">Aged 55+</div><div class="value">${pct(male.concat(female).filter((a) => a.age === "55+").reduce((s, a) => s + a.share, 0))}</div><div class="foot">share of adults</div></div>
+        <div class="kpi"><div class="label">Tertiary educated</div><div class="value">${pct(tert?.share)}</div><div class="foot">ISCED, adults 25–64</div></div>
+        <div class="kpi"><div class="label">Median HH income (EUR est.)</div><div class="value">${d.hhi?.["Median EUR Est"] ? "€" + int(+d.hhi["Median EUR Est"]) : "–"}</div><div class="foot">${d.hhi?.Confidence ? "Confidence: " + esc(d.hhi.Confidence) : "HHI Comparable"}</div></div>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg>Gender × age</h2><small>adults 18+</small></div>
+          ${legend([["Male", css("--s1")], ["Female", css("--s2")]])}
+          <div class="chart"><canvas id="c-age"></canvas></div>
+          <div id="t-age"></div></div>
+        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education</h2></div><div id="edu"></div></div>
+        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>Household income (local)</h2></div><div id="inc"></div></div>
+        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2><small>HHI Comparable tab</small></div><div id="hhi"></div></div>
+        <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Zip codes</h2><small>${zipInfo}</small></div><div id="zipcard"></div></div>
+        ${d.extras.length ? `<div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Additional country-specific tables</h2><small>kept from the original sheets</small></div><div id="extras"></div></div>` : ""}
+        <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>Sources &amp; notes</h2></div><div id="sources"></div></div>
+      </div>`;
+
+    $("#sample-n").addEventListener("input", () => { store.set("n", sampleN()); fillCountryTables(d); });
+    $("#add-compare").addEventListener("click", () => { const l = store.get("compare", []); if (!l.includes(d.name)) { l.push(d.name); store.set("compare", l.slice(-6)); } });
+
+    chart("c-age", { type: "bar", data: { labels: AGES, datasets: [
+      { label: "Male", data: AGES.map((a) => (male.find((m) => m.age === a)?.share || 0) * 100), ...bar(css("--s1")) },
+      { label: "Female", data: AGES.map((a) => (female.find((m) => m.age === a)?.share || 0) * 100), ...bar(css("--s2")) }] },
+      options: { scales: { x: { grid: { display: false } }, ...pctAxis() }, plugins: { legend: { display: false }, tooltip: pctTip } } });
+
+    // zip card
+    const zc = $("#zipcard");
+    if (!d.zip_sheet) zc.innerHTML = `<p class="muted">No zip code tab is available for ${esc(d.name)} in the workbook.</p>`;
+    else {
+      zc.innerHTML = `${d.has_coords ? "" : `<div class="note">This country's zip data has no coordinates, so radius search isn't available. You can still search and export by region or place.</div>`}
+        <p class="small">Click a region to list and export all its zip codes, or <a href="#/locations" id="go-loc">search a city or zip code in ${esc(d.name)}</a>.</p>
+        <div class="regions">${d.regions.map((r) => `<button data-v="${esc(r.admin1)}">${esc(r.admin1)} <span class="muted">${int(r.n)}</span></button>`).join("") || '<span class="muted">No region breakdown in the source data.</span>'}</div>`;
+      $("#go-loc").addEventListener("click", () => { $("#loc-country").value = d.name; });
+      $$(".regions button", zc).forEach((b) => b.addEventListener("click", () => { location.hash = "#/locations"; $("#loc-country").value = d.name; loadArea({ country: d.name, level: "admin1", value: b.dataset.v }); }));
+    }
+
+    // extras
+    if (d.extras.length) $("#extras").innerHTML = d.extras.map((x) => `<div class="extra">${x.title ? `<h3>${esc(x.title)}</h3>` : ""}${gridTable(x.rows)}${x.sheet !== d.natrep_sheet ? `<div class="small muted">from tab “${esc(x.sheet)}”</div>` : ""}</div>`).join("");
+
+    // sources
+    const src = d.sources || {};
+    $("#sources").innerHTML = `
+      ${d.notes.length ? `<ul class="notes">${d.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
+      ${Object.keys(src).length ? `<details><summary>Full source reference (Sources tab)</summary><dl class="kv">${Object.entries(src).filter(([k]) => k !== "COUNTRY").map(([k, v]) => `<dt>${esc(k)}</dt><dd>${linkify(v)}</dd>`).join("")}</dl></details>` : ""}`;
+
+    fillCountryTables(d);
+  }
+
+  function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+
+  function fillCountryTables(d) {
+    const N = sampleN();
+    // gender × age table
+    const m = (g, a) => d.age_gender.find((x) => x.gender === g && x.age === a)?.share || 0;
+    let tm = 0, tf = 0;
+    $("#t-age").innerHTML = `<table><thead><tr><th>Age</th><th class="num">Male %</th><th class="num">Male n</th><th class="num">Female %</th><th class="num">Female n</th><th class="num">Total %</th><th class="num">Total n</th></tr></thead><tbody>
+      ${AGES.map((a) => { const x = m("Male", a), y = m("Female", a); tm += x; tf += y;
+        return `<tr><td>${a}</td><td class="num">${pct(x, 2)}</td><td class="num">${int(x * N)}</td><td class="num">${pct(y, 2)}</td><td class="num">${int(y * N)}</td><td class="num">${pct(x + y, 2)}</td><td class="num">${int((x + y) * N)}</td></tr>`; }).join("")}
+      <tr class="total"><td>Total</td><td class="num">${pct(tm, 2)}</td><td class="num">${int(tm * N)}</td><td class="num">${pct(tf, 2)}</td><td class="num">${int(tf * N)}</td><td class="num">${pct(tm + tf, 2)}</td><td class="num">${int((tm + tf) * N)}</td></tr></tbody></table>`;
+
+    // education
+    const groups = {};
+    d.education.forEach((e) => (groups[e.classification] ||= []).push(e));
+    $("#edu").innerHTML = Object.entries(groups).map(([cls, rows], i) => `
+      <h3>${esc(cls)}</h3>
+      <div class="chart" style="height:${40 + rows.length * 34}px"><canvas id="c-edu-${i}"></canvas></div>
+      <table><thead><tr><th>Level</th><th class="num">%</th><th class="num">n</th></tr></thead><tbody>
+      ${rows.map((r) => `<tr><td>${esc(r.level)}</td><td class="num">${pct(r.share)}</td><td class="num">${r.share == null ? "–" : int(r.share * N)}</td></tr>`).join("")}</tbody></table>`).join("") || '<p class="muted">No education data.</p>';
+    Object.values(groups).forEach((rows, i) => chart(`c-edu-${i}`, { type: "bar",
+      data: { labels: rows.map((r) => r.level.length > 34 ? r.level.slice(0, 32) + "…" : r.level), datasets: [{ data: rows.map((r) => r.share == null ? null : r.share * 100), ...bar(css("--s1")) }] },
+      options: { indexAxis: "y", scales: { ...pctAxis("x"), y: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: pctTip } } }));
+
+    // income
+    const inc = d.income, has = inc.some((r) => r.share != null);
+    const i0 = inc[0] || {};
+    $("#inc").innerHTML = !inc.length ? '<p class="muted">No income table.</p>' : `
+      <p class="small">${esc(i0.definition)} · ${esc(i0.currency)} · ${esc(i0.year)}${i0.confidence ? " · Confidence: " + esc(i0.confidence) : ""}</p>
+      ${has ? `<div class="chart" style="height:${40 + inc.length * 34}px"><canvas id="c-inc"></canvas></div>` : '<div class="note">No % distribution by band is published – reference figures only.</div>'}
+      <table><thead><tr><th>Band</th>${has ? '<th class="num">%</th><th class="num">n</th>' : ""}</tr></thead><tbody>
+      ${inc.map((r) => `<tr><td>${esc(r.band)}</td>${has ? `<td class="num">${pct(r.share)}</td><td class="num">${r.share == null ? "–" : int(r.share * N)}</td>` : ""}</tr>`).join("")}</tbody></table>
+      <p class="small muted">Source: ${esc(i0.source)}${i0.base && i0.base !== "—" ? " · Base: " + esc(i0.base) : ""}</p>`;
+    if (has) chart("c-inc", { type: "bar", data: { labels: inc.map((r) => r.band.replace(/ \(.*\)$/, "")), datasets: [{ data: inc.map((r) => r.share * 100), ...bar(css("--s1")) }] },
+      options: { indexAxis: "y", scales: { ...pctAxis("x"), y: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: pctTip } } });
+
+    // HHI comparable
+    const h = d.hhi;
+    if (!h) $("#hhi").innerHTML = '<p class="muted">Not in the HHI Comparable tab.</p>';
+    else {
+      const bands = Object.keys(h).filter((k) => k.endsWith(" %"));
+      $("#hhi").innerHTML = `<p class="small">Median ≈ €${int(+h["Median EUR Est"])} · Confidence: ${esc(h.Confidence)} · ${esc(h["Primary Source Route"] || "")}</p>
+        <div class="chart"><canvas id="c-hhi"></canvas></div>
+        <table><thead><tr><th>Band</th><th class="num">%</th><th class="num">Households</th><th class="num">n</th></tr></thead><tbody>
+        ${bands.map((b) => `<tr><td>${esc(b.replace(" %", ""))}</td><td class="num">${pct(+h[b])}</td><td class="num">${int(+h[b.replace(" %", " HH")])}</td><td class="num">${int(+h[b] * N)}</td></tr>`).join("")}</tbody></table>`;
+      chart("c-hhi", { type: "bar", data: { labels: bands.map((b) => b.replace(" %", "")), datasets: [{ data: bands.map((b) => +h[b] * 100), ...bar(css("--s1")) }] },
+        options: { scales: { x: { grid: { display: false } }, ...pctAxis() }, plugins: { legend: { display: false }, tooltip: pctTip } } });
+    }
+  }
+
+  function gridTable(rows) {
+    if (!rows.length) return "";
+    const isNum = (v) => typeof v === "number";
+    const header = rows.length > 1 && rows[0].every((v) => !isNum(v)) ? rows[0] : null;
+    const body = header ? rows.slice(1) : rows;
+    const ncol = Math.max(...rows.map((r) => r.length));
+    const pctCol = [...Array(ncol)].map((_, j) => { const nums = body.map((r) => r[j]).filter(isNum); return nums.length && nums.every((v) => v >= 0 && v <= 1) && nums.some((v) => !Number.isInteger(v)); });
+    const fmt = (v, j) => !isNum(v) ? esc(v) : pctCol[j] ? pct(v, 1) : Number.isInteger(v) ? v.toLocaleString("en-GB") : (+v.toFixed(4)).toLocaleString("en-GB");
+    const shown = body.slice(0, 300);
+    return `<table>${header ? `<thead><tr>${header.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead>` : ""}<tbody>
+      ${shown.map((r) => `<tr>${r.map((v, j) => `<td class="${isNum(v) ? "num" : ""}">${fmt(v, j)}</td>`).join("")}</tr>`).join("")}</tbody></table>
+      ${body.length > shown.length ? `<div class="small muted">Showing ${shown.length} of ${body.length} rows – see the workbook for the rest.</div>` : ""}`;
+  }
+
+  // ------------------------------------------------------------------ compare view
+  const SLOTS = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6"];
+  const cache = {};
+  const detail = async (n) => (cache[n] ||= api("/api/countries/" + encodeURIComponent(n)));
+  function slotColors() {
+    // colour follows the country, not its position: keep a stable slot per country
+    const list = store.get("compare", []), slots = store.get("slots", {});
+    const used = new Set(list.map((n) => slots[n]).filter((s) => s != null));
+    list.forEach((n) => { if (slots[n] == null || ![...Array(6).keys()].includes(slots[n])) { const free = [...Array(6).keys()].find((i) => !used.has(i)); slots[n] = free; used.add(free); } });
+    Object.keys(slots).forEach((n) => { if (!list.includes(n)) delete slots[n]; });
+    store.set("slots", slots);
+    return Object.fromEntries(list.map((n) => [n, css(SLOTS[slots[n]])]));
+  }
+
+  const eduKey = (lvl) => /^below/i.test(lvl) ? "Below upper secondary" : /^tertiary/i.test(lvl) ? "Tertiary" : "Upper sec. / post-sec.";
+  const EDU = ["Below upper secondary", "Upper sec. / post-sec.", "Tertiary"];
+  let cmpRows = [];
+
+  async function renderCompare() {
+    let list = store.get("compare", null);
+    if (!list) { list = ["Netherlands", "Germany", "United Kingdom"]; store.set("compare", list); }
+    const colors = slotColors();
+    $("#compare-n").value = store.get("n", 1000);
+    $("#compare-add").innerHTML = `<option value="">+ Add country…</option>` + COUNTRIES.filter((c) => !list.includes(c.name)).map((c) => `<option>${esc(c.name)}</option>`).join("");
+    $("#compare-add").disabled = list.length >= 6;
+    $("#compare-chips").innerHTML = list.map((n) => `<span class="chip"><i style="background:${colors[n]}"></i>${esc(n)}<button data-n="${esc(n)}" aria-label="Remove ${esc(n)}">×</button></span>`).join("");
+    $$("#compare-chips button").forEach((b) => b.addEventListener("click", () => { store.set("compare", store.get("compare", []).filter((x) => x !== b.dataset.n)); renderCompare(); }));
+    const body = $("#compare-body");
+    if (!list.length) { body.innerHTML = '<p class="empty">Add up to six countries to compare.</p>'; return; }
+    const ds = await Promise.all(list.map(detail));
+    const N = Math.max(1, +$("#compare-n").value || 1000);
+    const lg = legend(list.map((n) => [n, colors[n]]));
+    body.innerHTML = `
+      <div class="grid">
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Age distribution (adults 18+)</h2>${lg}<div class="chart"><canvas id="k-age"></canvas></div></div>
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education (ISCED, adults 25–64)</h2>${lg}<div class="chart"><canvas id="k-edu"></canvas></div></div>
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2>${lg}<div class="chart"><canvas id="k-hhi"></canvas></div></div>
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16.1a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 20 0"/><circle cx="12" cy="20" r="1"/></svg>Internet penetration</h2><div class="chart"><canvas id="k-int"></canvas></div></div>
+        <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 6h18M3 18h18"/></svg>Side by side</h2><small>% (n at sample size ${int(N)})</small></div><div class="table-wrap" id="k-table"></div></div>
+        <div class="card full"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>Local household income bands</h2><div class="grid" id="k-inc"></div></div>
+      </div>`;
+    const ageShare = (d, a) => d.age_gender.filter((x) => x.age === a).reduce((s, x) => s + (x.share || 0), 0);
+    const edu = (d, k) => { const r = d.education.filter((e) => /^ISCED/.test(e.classification) && eduKey(e.level) === k); return r.length && r.some((x) => x.share != null) ? r.reduce((s, x) => s + (x.share || 0), 0) : null; };
+    const hhiBands = (META.hhi_columns || []).filter((c) => c.endsWith(" %"));
+    const grouped = (labels, fn) => ({ labels, datasets: ds.map((d) => ({ label: d.name, data: labels.map((l) => { const v = fn(d, l); return v == null ? null : v * 100; }), ...bar(colors[d.name]) })) });
+    const opts = { scales: { x: { grid: { display: false } }, ...pctAxis() }, plugins: { legend: { display: false }, tooltip: pctTip } };
+    chart("k-age", { type: "bar", data: grouped(AGES, ageShare), options: opts });
+    chart("k-edu", { type: "bar", data: grouped(EDU, edu), options: opts });
+    chart("k-hhi", { type: "bar", data: grouped(hhiBands.map((b) => b.replace(" %", "")), (d, l) => d.hhi ? +d.hhi[l + " %"] : null), options: opts });
+    chart("k-int", { type: "bar", data: { labels: ds.map((d) => d.name), datasets: [{ data: ds.map((d) => d.internet * 100), backgroundColor: ds.map((d) => colors[d.name]), borderRadius: 4, maxBarThickness: 28 }] },
+      options: { indexAxis: "y", scales: { x: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" } }, y: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: pctTip } } });
+
+    // table
+    const male = (d) => d.age_gender.filter((x) => x.gender === "Male").reduce((s, x) => s + x.share, 0);
+    cmpRows = [
+      ["Internet penetration", (d) => d.internet, true],
+      ["Male", male, true], ["Female", (d) => 1 - male(d), true],
+      ...AGES.map((a) => ["Age " + a, (d) => ageShare(d, a), true]),
+      ...EDU.map((k) => ["Education: " + k, (d) => edu(d, k), true]),
+      ...hhiBands.map((b) => ["HHI " + b.replace(" %", ""), (d) => (d.hhi ? +d.hhi[b] : null), true]),
+      ["Median HH income (EUR est.)", (d) => (d.hhi ? +d.hhi["Median EUR Est"] : null), false, (v) => "€" + int(v)],
+      ["HHI confidence", (d) => d.hhi?.Confidence ?? null, false, (v) => esc(v)],
+      ["Zip records", (d) => d.zip_records, false, int],
+      ["Radius search available", (d) => (d.has_coords ? "Yes" : "No"), false, (v) => v],
+    ];
+    $("#k-table").innerHTML = `<table class="cmp"><thead><tr><th>Metric</th>${ds.map((d) => `<th class="num">${esc(d.name)}</th>`).join("")}</tr></thead><tbody>
+      ${cmpRows.map(([label, fn, isPct, f]) => { const vals = ds.map(fn); const nums = vals.filter((v) => typeof v === "number");
+        const max = nums.length > 1 ? Math.max(...nums) : null;
+        return `<tr><td>${esc(label)}</td>${vals.map((v) => `<td class="num ${isPct && v === max ? "best" : ""}">${v == null ? "–" : isPct ? `${pct(v)} <span class="muted">(${int(v * N)})</span>` : f(v)}</td>`).join("")}</tr>`; }).join("")}</tbody></table>`;
+    $("#k-inc").innerHTML = ds.map((d) => `<div><h3><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[d.name]}"></i> ${esc(d.name)} <span class="muted">· ${esc(d.income[0]?.currency || "")} ${esc(d.income[0]?.year || "")}</span></h3>
+      <table><tbody>${d.income.map((r) => `<tr><td>${esc(r.band)}</td><td class="num">${r.share == null ? "–" : pct(r.share)}</td></tr>`).join("")}</tbody></table>
+      <div class="small muted">${esc(d.income[0]?.definition || "")}</div></div>`).join("");
+    window._cmp = { ds, N };
+  }
+
+  function downloadCompareCsv() {
+    const { ds, N } = window._cmp || {};
+    if (!ds) return;
+    const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [["Metric", ...ds.flatMap((d) => [d.name + " %", d.name + " n"])].map(q).join(",")];
+    cmpRows.forEach(([label, fn, isPct]) => lines.push([label, ...ds.flatMap((d) => { const v = fn(d); return isPct ? [v == null ? "" : (v * 100).toFixed(2), v == null ? "" : Math.round(v * N)] : [v, ""]; })].map(q).join(",")));
+    const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv" });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `natrep_compare_${ds.map((d) => d.iso2).join("-")}.csv` });
+    a.click();
+  }
+
+  // ------------------------------------------------------------------ locations view
+  let map, layer, centerMarker, circle;
+  const state = { center: null, last: null };
+  function initMap() {
+    if (map) return;
+    map = L.map("map", { preferCanvas: true, worldCopyJump: true }).setView([50, 10], 4);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap contributors" }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+    map.on("click", (e) => setCenter({ lat: e.latlng.lat, lon: e.latlng.lng, label: `Map point ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`, country: null }));
+  }
+
+  function setCenter(c) {
+    initMap();
+    state.center = c;
+    $("#center-label").textContent = c.label;
+    $("#center-label").title = c.label;
+    $("#same-country").disabled = !c.country;
+    $("#run-radius").disabled = c.lat == null;
+    if (centerMarker) centerMarker.remove();
+    if (c.lat != null) {
+      centerMarker = L.marker([c.lat, c.lon], { icon: L.divIcon({ className: "pin", html: '<svg width="30" height="30" viewBox="0 0 24 24" fill="' + css("--pin") + '" stroke="#fff" stroke-width="1.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>', iconSize: [30, 30], iconAnchor: [15, 29] }) }).addTo(map).bindTooltip(c.label);
+      map.setView([c.lat, c.lon], Math.max(map.getZoom(), 10));
+      runRadius();
+    } else {
+      $("#loc-summary").innerHTML = `<div class="note">No coordinates for this location in the source data, so a radius search isn't possible. Use “all zips in place/region” instead.</div>`;
+    }
+  }
+
+  async function runRadius() {
+    const c = state.center; if (!c || c.lat == null) return;
+    const km = +$("#km").value;
+    const country = $("#same-country").checked && c.country ? c.country : null;
+    $("#loc-summary").innerHTML = '<span class="muted">Searching…</span>';
+    let d;
+    try { d = await api("/api/radius?" + qs({ lat: c.lat, lon: c.lon, km, country })); }
+    catch (e) { $("#loc-summary").innerHTML = `<div class="note">${esc(e.message)}</div>`; return; }
+    if (circle) circle.remove();
+    circle = L.circle([c.lat, c.lon], { radius: km * 1000, color: css("--s1"), weight: 2, fillOpacity: 0.06 }).addTo(map);
+    map.fitBounds(circle.getBounds(), { padding: [20, 20] });
+    const csvUrl = "/api/radius.csv?" + qs({ lat: c.lat, lon: c.lon, km, country, label: c.label.split(",")[0] });
+    showResults(d.results, `${int(d.count)} zip codes within ${km} km`, `of ${c.label}${country ? " · " + country + " only" : ""}${d.truncated ? " · list truncated" : ""}`, csvUrl, true);
+  }
+
+  async function loadArea({ country, level, value, within }) {
+    initMap();
+    $("#loc-summary").innerHTML = '<span class="muted">Loading…</span>';
+    const d = await api("/api/area?" + qs({ country, level, value, within }));
+    if (circle) { circle.remove(); circle = null; }
+    if (centerMarker) { centerMarker.remove(); centerMarker = null; }
+    state.center = null; $("#run-radius").disabled = true;
+    $("#center-label").textContent = `${value}${within ? ", " + within : ""} (${country})`;
+    showResults(d.results, `${int(d.count)} zip codes`, `in ${value}${within ? ", " + within : ""}, ${country}`, "/api/area.csv?" + qs({ country, level, value, within }), false);
+    const pts = d.results.filter((r) => r.lat != null).map((r) => [r.lat, r.lon]);
+    if (pts.length) map.fitBounds(pts, { padding: [20, 20], maxZoom: 13 });
+  }
+
+  function showResults(res, headline, sub, csvUrl, withDist) {
+    state.last = res;
+    layer.clearLayers();
+    const MAXM = 5000, color = css("--s2"), ring = css("--surface");
+    res.slice(0, MAXM).forEach((r) => { if (r.lat != null) L.circleMarker([r.lat, r.lon], { radius: 4, color: ring, weight: 1, fillColor: color, fillOpacity: 0.9 })
+      .bindTooltip(`<b>${esc(r.zip)}</b> ${esc(r.place || "")}<br>${esc(r.admin1 || "")}${r.distance_km != null ? ` · ${r.distance_km} km` : ""}`).addTo(layer); });
+    const MAXT = 2000;
+    $("#loc-summary").innerHTML = `<div><div class="count">${headline}</div><div class="small">${esc(sub)}${res.length > MAXM ? ` · map shows nearest ${int(MAXM)}` : ""}</div></div>
+      <span style="flex:1"></span>
+      <button class="btn ghost sm" id="copy-zips" ${res.length ? "" : "disabled"}>Copy zip list</button>
+      <a class="btn sm" href="${csvUrl}" ${res.length ? "" : 'style="pointer-events:none;opacity:.45"'}>Download CSV</a>`;
+    $("#copy-zips").addEventListener("click", async () => {
+      const txt = [...new Set(res.map((r) => r.zip))].join("\n");
+      try { await navigator.clipboard.writeText(txt); toast(`Copied ${int(res.length)} zip codes`); } catch { toast("Copy failed – use Download CSV"); }
+    });
+    $("#loc-table").innerHTML = res.length ? `<table><thead><tr><th>Zip</th><th>Place</th><th>Region</th><th>Province / county</th>${withDist ? '<th class="num">km</th>' : ""}<th>Country</th></tr></thead><tbody>
+      ${res.slice(0, MAXT).map((r) => `<tr><td><b>${esc(r.zip)}</b></td><td>${esc(r.place)}${r.places && r.places.length > 1 ? ` <span class="muted">+${r.places.length - 1}</span>` : ""}</td><td>${esc(r.admin1)}</td><td>${esc(r.admin2)}</td>${withDist ? `<td class="num">${r.distance_km}</td>` : ""}<td>${esc(r.iso2)}</td></tr>`).join("")}
+      </tbody></table>${res.length > MAXT ? `<p class="small muted" style="padding:8px">Showing the first ${int(MAXT)} – download the CSV for all ${int(res.length)}.</p>` : ""}` : '<p class="empty">No zip codes found.</p>';
+  }
+
+  let searchTimer, searchSeq = 0;
+  async function doSearch() {
+    const q = $("#loc-q").value.trim(), country = $("#loc-country").value;
+    const box = $("#loc-results");
+    if (q.length < 2) { box.innerHTML = '<p class="hint">Type at least two characters.</p>'; return; }
+    const seq = ++searchSeq;
+    const d = await api("/api/search?" + qs({ q, country, limit: 40 }));
+    if (seq !== searchSeq) return;
+    const zipHits = d.results.filter((r) => r.zip.replace(/\s/g, "").toLowerCase().startsWith(q.replace(/\s/g, "").toLowerCase()));
+    let html = "";
+    if (d.places.length) html += `<h3>Cities &amp; places</h3>` + d.places.map((p, i) => `<button class="hit" data-k="p${i}"><b>${esc(p.place)}</b><span class="s">${esc([p.admin1, p.country].filter(Boolean).join(", "))} · ${p.lat == null ? "no coordinates" : "radius from centre"}</span></button>${p.zips > 1 ? `<button class="hit sub" data-k="a${i}"><span class="s">↳ List all ${int(p.zips)} zip codes of ${esc(p.place)}</span></button>` : ""}`).join("");
+    if (d.regions.length) html += `<h3>Regions</h3>` + d.regions.map((r, i) => `<button class="hit" data-k="r${i}"><b>${esc(r.value)}</b><span class="s">${r.level === "admin1" ? "State / region" : "Province / county"} · ${esc(r.country)} · ${int(r.n)} records</span></button>`).join("");
+    if (zipHits.length) html += `<h3>Zip codes</h3>` + zipHits.map((r, i) => `<button class="hit" data-k="z${i}"><b>${esc(r.zip)}</b> ${esc(r.place)}<span class="s">${esc([r.admin1, r.country].filter(Boolean).join(", "))}</span></button>`).join("");
+    box.innerHTML = html || '<p class="hint">No matches.</p>';
+    $$(".hit", box).forEach((b) => b.addEventListener("click", () => {
+      $$(".hit", box).forEach((x) => x.classList.remove("active")); b.classList.add("active");
+      const k = b.dataset.k, i = +k.slice(1);
+      if (k[0] === "p") { const p = d.places[i];
+        if (p.lat == null) loadArea({ country: p.country, level: "place", value: p.place, within: p.admin1 });
+        else setCenter({ lat: p.lat, lon: p.lon, label: `${p.place}, ${[p.admin1, p.country].filter(Boolean).join(", ")}`, country: p.country });
+      }
+      if (k[0] === "a") { const p = d.places[i]; loadArea({ country: p.country, level: "place", value: p.place, within: p.admin1 }); }
+      if (k[0] === "r") { const r = d.regions[i]; loadArea({ country: r.country, level: r.level, value: r.value }); }
+      if (k[0] === "z") { const r = zipHits[i]; setCenter({ lat: r.lat, lon: r.lon, label: `${r.zip} ${r.place}, ${r.country}`, country: r.country }); }
+    }));
+  }
+
+  // ------------------------------------------------------------------ boot
+  async function boot() {
+    [META, COUNTRIES] = await Promise.all([api("/api/meta"), api("/api/countries")]);
+    $("#meta").innerHTML = `${int(META.countries)} countries · ${int(META.zip_rows)} zip records<br>Data: ${esc(META.source_file)} · loaded ${esc(META.built)}`;
+    $("#loc-country").innerHTML += COUNTRIES.filter((c) => c.zip_records).map((c) => `<option>${esc(c.name)}</option>`).join("");
+    $("#country-filter").addEventListener("input", renderCountryList);
+    $("#compare-add").addEventListener("change", (e) => { if (!e.target.value) return; const l = store.get("compare", []); l.push(e.target.value); store.set("compare", l.slice(0, 6)); renderCompare(); });
+    $("#compare-n").addEventListener("change", () => { store.set("n", +$("#compare-n").value || 1000); renderCompare(); });
+    $("#compare-csv").addEventListener("click", downloadCompareCsv);
+    $("#loc-q").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(doSearch, 250); });
+    $("#loc-country").addEventListener("change", doSearch);
+    const syncKm = (v) => { $("#km").value = v; $("#km-range").value = Math.min(100, v); };
+    $("#km-range").addEventListener("input", (e) => syncKm(e.target.value));
+    $("#km-range").addEventListener("change", runRadius);
+    $("#km").addEventListener("change", (e) => { syncKm(e.target.value); runRadius(); });
+    $("#same-country").addEventListener("change", runRadius);
+    $("#run-radius").addEventListener("click", runRadius);
+    const SUN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+    const MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+    const isDark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
+    const paintToggle = () => { const b = $("#theme-toggle"); b.innerHTML = isDark() ? SUN : MOON; b.title = isDark() ? "Switch to light mode" : "Switch to dark mode"; };
+    const rerender = () => { paintToggle(); if (circle) circle.setStyle({ color: css("--s1") }); route(); };
+    $("#theme-toggle").addEventListener("click", () => { const t = isDark() ? "light" : "dark"; document.documentElement.dataset.theme = t; store.set("theme", t); rerender(); });
+    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!store.get("theme", null)) rerender(); });
+    paintToggle();
+    if (!location.hash) location.hash = "#/country";
+    route();
+  }
+  boot().catch((e) => { document.body.insertAdjacentHTML("beforeend", `<div class="note" style="margin:20px">Couldn't start: ${esc(e.message)}</div>`); });
+})();
