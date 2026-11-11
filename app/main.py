@@ -1,4 +1,4 @@
-"""Pure NatRep Explorer – FastAPI backend serving Nat Rep figures and zip code search from data/natrep.db."""
+"""NatRep Explorer – FastAPI backend serving Nat Rep figures and zip code search from data/natrep.db."""
 import csv
 import io
 import json
@@ -17,7 +17,7 @@ DB = os.environ.get("NATREP_DB", os.path.join(BASE, "..", "data", "natrep.db"))
 MAX_RADIUS_KM = 500
 MAX_ROWS = 50000
 
-app = FastAPI(title="Pure NatRep Explorer", version="1.0")
+app = FastAPI(title="NatRep Explorer", version="1.0")
 
 
 def db():

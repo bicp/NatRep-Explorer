@@ -1,4 +1,4 @@
-/* Pure NatRep Explorer – front end (vanilla JS, Chart.js, Leaflet) */
+/* NatRep Explorer – front end (vanilla JS, Chart.js, Leaflet) */
 (() => {
   "use strict";
   const $ = (s, el = document) => el.querySelector(s);

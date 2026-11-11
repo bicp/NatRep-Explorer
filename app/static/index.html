@@ -4,7 +4,8 @@
   <script>try{var t=localStorage.getItem("natrep:theme");if(t)document.documentElement.dataset.theme=JSON.parse(t)}catch(e){}</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pure NatRep Explorer</title>
+  <title>NatRep Explorer</title>
+  <link rel="icon" type="image/svg+xml" href="/static/bee.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/static/vendor/leaflet.css">
@@ -13,8 +14,8 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
-      <span>Pure NatRep Explorer</span>
+      <span class="logo"><svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M27.5 18.5C26 13 23 9.5 19.5 7.5M36.5 18.5C38 13 41 9.5 44.5 7.5"/><circle cx="19" cy="7" r="2" fill="currentColor" stroke="none"/><circle cx="45" cy="7" r="2" fill="currentColor" stroke="none"/><path d="M23.5 28v-2a8.5 8.5 0 0 1 17 0v2"/><path d="M32 27.5L10 32.5C3 34.5 3.5 46 10.5 48.5C15.5 50 19.5 47 23.5 43"/><path d="M32 27.5L54 32.5C61 34.5 60.5 46 53.5 48.5C48.5 50 44.5 47 40.5 43"/><path d="M23.5 31.5L32 28.5L40.5 31.5V48.5L32 57L23.5 48.5Z"/><path d="M23.5 38H40.5M23.5 43.5H40.5M25 49H39"/><path d="M32 31.5L35 35H29Z" fill="currentColor" stroke-width="1.5"/></svg></span>
+      <span>NatRep Explorer</span>
     </div>
     <nav class="tabs" role="tablist">
       <a href="#/country" data-view="country" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>Countries</a>
@@ -81,7 +82,7 @@
     </section>
   </main>
 
-  <footer class="footer">Pure NatRep Explorer – Nat Rep figures and zip code radius search.</footer>
+  <footer class="footer">NatRep Explorer – Nat Rep figures and zip code radius search.</footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/static/vendor/leaflet.js"></script>
   <script src="/static/vendor/chart.umd.js"></script>

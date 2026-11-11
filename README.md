@@ -1,4 +1,4 @@
-# Pure NatRep Explorer
+# NatRep Explorer
 
 A small web app that makes **Global_Nat_Rep_and_Zip_Codes_Combined.xlsx** browsable for the team:
 

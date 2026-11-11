@@ -186,7 +186,7 @@ details summary { cursor: pointer; color: var(--text-2); font-weight: 600; margi
 .hit.sub { padding: 0 8px 6px 18px; margin-top: -4px; }
 .hit.sub .s { color: var(--accent); }
 
-/* ---------- Pure design layer ---------- */
+/* ---------- design layer ---------- */
 body { font-size: 14px; }
 h1 { font-size: 24px; font-weight: 600; }
 h2 { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
