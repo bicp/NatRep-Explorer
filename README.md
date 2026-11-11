@@ -15,37 +15,82 @@ Light and dark mode: follows the computer's setting by default; the sun/moon but
 
 ## Run it locally
 
-Requires Python 3.10+.
+Requires Python 3.10+. Everything runs in the browser: there is no backend. The workbook is converted into a SQLite
+database that the browser reads in small pieces over HTTP (with [sql.js-httpvfs](https://github.com/phiresky/sql.js-httpvfs)),
+so only the parts a search needs are downloaded.
 
 1. Copy the workbook into `data/` (keep the name `Global_Nat_Rep_and_Zip_Codes_Combined.xlsx`).
 2. Mac/Linux: `./run.sh`  ·  Windows: double-click `run.bat`
 3. Open http://localhost:8000
 
-The first start converts the workbook into `data/natrep.db` (SQLite, ~1–2 minutes). After that it starts instantly.
-
-## Share it with the team
-
-Run it on any always-on machine or small VM the team can reach, e.g. with Docker:
-
-```bash
-cp /path/to/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/
-docker build -t natrep-explorer .
-docker run -d -p 8000:8000 --name natrep natrep-explorer
-```
-
-There is no login built in – host it on the internal network/VPN, or put it behind your SSO proxy.
+The first start converts the workbook into `data/natrep.db` (SQLite, ~1–2 minutes) and publishes it as chunks in
+`app/static/db/` (plus `config.json`). After that it starts instantly. `scripts/serve.py` is a small static server
+that supports HTTP Range requests, which the browser needs to read the database (Python's built-in server doesn't).
 
 ## Updating the data
 
-When the workbook changes, replace the file in `data/` and rebuild:
+When the workbook changes, replace the file in `data/` and run `./run.sh` (or `run.bat`): it rebuilds automatically
+when the workbook is newer than the published database. Then redeploy (see *Redeploy* below).
+
+To rebuild without starting the server:
 
 ```bash
-python scripts/build_db.py data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/natrep.db
+.venv/bin/python scripts/build_db.py data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/natrep.db app/static/db
 ```
 
-(`run.sh` rebuilds automatically when the workbook is newer than the database; with Docker, rebuild the image.)
+`.venv/` is created by `run.sh` on the first build and holds the importer's only dependency, `openpyxl`.
 The importer reads the **Home** tab to find each country's Nat Rep and ZIP tabs, so new countries added there
 are picked up automatically as long as they follow the existing layout.
+
+## Deploy to Cloudflare Pages
+
+`app/static/` is the whole site once the database is built. Deploy it as a **direct upload** with Wrangler (Cloudflare's
+CLI), not through Git: the database chunks are built locally from the workbook and are not in the repository.
+Requires Node.js (for `npx`); the free Cloudflare plan is enough.
+
+### First deploy
+
+1. Build the database if you haven't yet: run `./run.sh`, then stop it with Ctrl+C.
+2. Log in to Cloudflare (opens the browser once):
+   ```bash
+   npx wrangler login
+   ```
+3. Create the Pages project (once):
+   ```bash
+   npx wrangler pages project create natrep-explorer --production-branch main
+   ```
+4. Upload the site:
+   ```bash
+   npx wrangler pages deploy app/static --project-name natrep-explorer --branch main
+   ```
+   The site is then live at `https://natrep-explorer.pages.dev`.
+5. Check that Cloudflare serves byte ranges – the app can't read the database without them. Expect `HTTP/2 206`:
+   ```bash
+   curl -s -D - -o /dev/null -H "Range: bytes=0-1023" https://natrep-explorer.pages.dev/db/natrep.db.000 | head -1
+   ```
+6. Add a login. There is none built in, and anyone who can open the site can download the whole database.
+   In the Cloudflare dashboard: **Zero Trust → Access → Applications → Add an application → Self-hosted**, add
+   `natrep-explorer.pages.dev` and `*.natrep-explorer.pages.dev` (every deploy also gets its own preview URL), and a
+   policy such as "emails ending in @yourcompany.com". Free for up to 50 users.
+
+### Redeploy
+
+After a code change or a new workbook:
+
+1. If the workbook changed, replace it in `data/` and rebuild (see *Updating the data*).
+2. Upload again – the same command as the first deploy:
+   ```bash
+   npx wrangler pages deploy app/static --project-name natrep-explorer --branch main
+   ```
+
+Each deploy replaces the whole site; earlier deploys stay listed under **Workers & Pages → natrep-explorer →
+Deployments**, where you can roll back. Tabs that were open before a data update must be reloaded: until then they
+mix old and new database files and show "database disk image is malformed".
+
+### Limits
+
+Pages allows files up to 25 MiB and 20,000 files per deploy. The database is published in 10 MB chunks
+(`CHUNK_BYTES` in `scripts/build_db.py`), so it stays within both even if the workbook grows a lot.
 
 ## Data notes
 
@@ -61,11 +106,13 @@ are picked up automatically as long as they follow the existing layout.
 ## Project layout
 
 ```
-app/main.py          FastAPI backend (JSON API + serves the UI)
-app/static/          UI: index.html, styles.css, app.js, vendored Leaflet + Chart.js
-scripts/build_db.py  Workbook → SQLite importer (R*Tree index for radius, FTS5 for search)
+app/static/              The whole app: index.html, styles.css, app.js, vendored Leaflet, Chart.js and sql.js-httpvfs
+app/static/db/           Built database chunks + config.json (generated, not in git)
+scripts/build_db.py      Workbook → SQLite importer; adds the indexes and lookup tables the browser queries, then splits
+                         the file into chunks
+scripts/serve.py         Local static server with HTTP Range support
 ```
 
-API: `/api/countries`, `/api/countries/{name}`, `/api/search?q=`, `/api/radius?lat=&lon=&km=`,
-`/api/radius.csv`, `/api/area?country=&level=admin1|admin2|place&value=`, `/api/area.csv`.
-Interactive docs at `/docs`.
+The browser reads the database a few KB at a time, so every query in `app.js` must use an index or a precomputed
+table (`places`, `regions`, `meta`). Check new queries with `EXPLAIN QUERY PLAN` – a `SCAN zips` would download most
+of the file.
