@@ -1,28 +1,32 @@
 :root {
   color-scheme: light;
-  --bg: #f8fbfb;
+  /* Palette: Aubergine Complementary (color-hex.com/color-palette/50432)
+     #5e2355 aubergine · #235e2c forest green · #cebdcc mauve · #f5f1f4 / #f1f5f2 off-whites */
+  --bg: #f5f1f4;
   --surface: #ffffff;
-  --surface-2: #f1f6f5;
-  --tint: #e3f2ef;
-  --border: #d1e0dd;
-  --text: #0a1f1d;
-  --text-2: #4a6461;
-  --muted: #7b9290;
-  --accent: #149077;
-  --accent-hover: #10785f;
+  --surface-2: #f1f5f2;
+  --tint: #ede3eb;
+  --border: #e0d3dd;
+  --text: #22101f;
+  --text-2: #5e4d5a;
+  --muted: #8d7c89;
+  --accent: #5e2355;
+  --accent-hover: #4a1b43;
   --accent-ink: #ffffff;
+  --accent-2: #235e2c;
   --warn-bg: #fff6e0;
   --warn: #7a5200;
-  /* chart series: teal first, validated for CVD separation */
-  --s1: #149077; --s2: #eb6834; --s3: #2a78d6; --s4: #eda100; --s5: #e87ba4; --s6: #6250d6;
-  --grid: rgba(10,31,29,.07);
+  /* chart series: palette family only — dark, mid and light steps of aubergine and green */
+  --s1: #5e2355; --s2: #235e2c; --s3: #b07aa6; --s4: #6fa577; --s5: #d6b4cf; --s6: #a9cdb0;
+  --grid: rgba(34,16,31,.07);
   --radius: 6px;
-  --head-bg: #f6faf9;
+  --head-bg: #faf6f9;
   --field: #ffffff;
-  --topbar: rgba(248,251,251,.85);
+  --topbar: rgba(245,241,244,.85);
   --note-border: #f1dfb0;
-  --pin: #149077;
-  --shadow: 0 1px 2px rgba(10,31,29,.04), 0 2px 8px rgba(10,31,29,.05);
+  --pin: #235e2c;
+  --focus: rgba(94,35,85,.35);
+  --shadow: 0 1px 2px rgba(34,16,31,.04), 0 2px 8px rgba(34,16,31,.06);
   --font: "Space Grotesk", system-ui, sans-serif;
   --mono: "JetBrains Mono", Menlo, monospace;
 }
@@ -30,25 +34,25 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
   color-scheme: dark;
-  --bg: #0b1716; --surface: #10201e; --surface-2: #172b28; --tint: #133a33; --border: #24403b;
-  --text: #e6f2ef; --text-2: #a3bdb8; --muted: #7c9792;
-  --accent: #1fa287; --accent-hover: #27b898; --accent-ink: #04130f;
+  --bg: #160c15; --surface: #1f121d; --surface-2: #2a1a27; --tint: #3b1f36; --border: #3e2b3a;
+  --text: #f5f1f4; --text-2: #cebdcc; --muted: #9a8796;
+  --accent: #c27fb6; --accent-hover: #d497c9; --accent-ink: #1a0a17; --accent-2: #6fb27a;
   --warn-bg: #3a2e12; --warn: #f2c25b; --note-border: #5a4818;
-  --s1: #1fa287; --s2: #d95926; --s3: #3987e5; --s4: #c98500; --s5: #d55181; --s6: #9085e9;
-  --grid: rgba(230,242,239,.08);
-  --head-bg: #132623; --field: #0d1c1a; --topbar: rgba(11,23,22,.85); --pin: #1fa287;
+  --s1: #c27fb6; --s2: #6fb27a; --s3: #8d4a82; --s4: #3f7a49; --s5: #e6c3df; --s6: #b5dcba;
+  --grid: rgba(245,241,244,.08);
+  --head-bg: #241621; --field: #1a0f18; --topbar: rgba(22,12,21,.85); --pin: #6fb27a; --focus: rgba(194,127,182,.45);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0b1716; --surface: #10201e; --surface-2: #172b28; --tint: #133a33; --border: #24403b;
-  --text: #e6f2ef; --text-2: #a3bdb8; --muted: #7c9792;
-  --accent: #1fa287; --accent-hover: #27b898; --accent-ink: #04130f;
+  --bg: #160c15; --surface: #1f121d; --surface-2: #2a1a27; --tint: #3b1f36; --border: #3e2b3a;
+  --text: #f5f1f4; --text-2: #cebdcc; --muted: #9a8796;
+  --accent: #c27fb6; --accent-hover: #d497c9; --accent-ink: #1a0a17; --accent-2: #6fb27a;
   --warn-bg: #3a2e12; --warn: #f2c25b; --note-border: #5a4818;
-  --s1: #1fa287; --s2: #d95926; --s3: #3987e5; --s4: #c98500; --s5: #d55181; --s6: #9085e9;
-  --grid: rgba(230,242,239,.08);
-  --head-bg: #132623; --field: #0d1c1a; --topbar: rgba(11,23,22,.85); --pin: #1fa287;
+  --s1: #c27fb6; --s2: #6fb27a; --s3: #8d4a82; --s4: #3f7a49; --s5: #e6c3df; --s6: #b5dcba;
+  --grid: rgba(245,241,244,.08);
+  --head-bg: #241621; --field: #1a0f18; --topbar: rgba(22,12,21,.85); --pin: #6fb27a; --focus: rgba(194,127,182,.45);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.25);
 }
 
@@ -202,7 +206,7 @@ h2 .ico, .ico { color: var(--accent); flex: none; }
 .country-list li a.active { background: var(--accent); }
 .country-list .iso, .tag, td.num, th.num, .kpi .value, .count, input[type=number] { font-family: var(--mono); }
 input[type=search], input[type=number], select { border-radius: 6px; border-color: var(--border); background: var(--field); font-family: var(--mono); font-size: 13px; padding: 8px 11px; }
-input:focus-visible, select:focus-visible { outline: 2px solid rgba(20,144,119,.35); border-color: var(--accent); outline-offset: 0; }
+input:focus-visible, select:focus-visible { outline: 2px solid var(--focus); border-color: var(--accent); outline-offset: 0; }
 
 .card, .kpi { border-radius: var(--radius); box-shadow: var(--shadow); border-color: var(--border); background: var(--surface); }
 .card { padding: 0; overflow: hidden; }
