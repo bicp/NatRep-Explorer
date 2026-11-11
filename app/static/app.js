@@ -7,6 +7,7 @@
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const pct = (v, d = 1) => (v == null || isNaN(v) ? "–" : (v * 100).toFixed(d) + "%");
   const int = (v) => (v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("en-GB"));
+  const DEFAULT_COUNTRY = "Australia";  // opened when the site is visited without a page in the URL
   const AGES = ["18-24", "25-34", "35-44", "45-54", "55+"];
   const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                   set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
@@ -196,7 +197,7 @@
     const v = ["country", "compare", "locations"].includes(view) ? view : "country";
     $$(".view").forEach((el) => el.classList.toggle("active", el.id === "view-" + v));
     $$(".tabs a").forEach((a) => a.classList.toggle("active", a.dataset.view === v));
-    if (v === "country") showCountry(decodeURIComponent(arg || store.get("country", "Netherlands")));
+    if (v === "country") showCountry(decodeURIComponent(arg || store.get("country", DEFAULT_COUNTRY)));
     if (v === "compare") renderCompare();
     if (v === "locations") { initMap(); setTimeout(() => map.invalidateSize(), 50); }
   }
@@ -574,7 +575,7 @@
     $("#theme-toggle").addEventListener("click", () => { const t = isDark() ? "light" : "dark"; document.documentElement.dataset.theme = t; store.set("theme", t); rerender(); });
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!store.get("theme", null)) rerender(); });
     paintToggle();
-    if (!location.hash) location.hash = "#/country";
+    if (!location.hash) location.hash = "#/country/" + encodeURIComponent(DEFAULT_COUNTRY);
     route();
   }
   boot().catch((e) => { document.body.insertAdjacentHTML("beforeend", `<div class="note" style="margin:20px">Couldn't start: ${esc(e.message)}</div>`); });
