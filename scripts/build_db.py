@@ -279,7 +279,7 @@ def main():
 # precomputed table. A full table scan would download most of the file.
 CELLS_PER_DEG = 10          # radius-search grid: 0.1° cells, cell = lat_row * 3600 + lon_col
 PAGE_SIZE = 1024            # recommended by sql.js-httpvfs; requestChunkSize must match
-CHUNK_BYTES = 10 * 1024 * 1024  # Cloudflare Pages allows files up to 25 MiB
+CHUNK_BYTES = 1024 * 1024  # small chunks: on Cloudflare a Pages Function slices each range out of its chunk
 
 
 def finalize(con):
@@ -345,11 +345,11 @@ def export_for_web(db_path, out_dir):
     with open(db_path, "rb") as fh:
         k = 0
         while chunk := fh.read(CHUNK_BYTES):
-            with open(os.path.join(out_dir, f"natrep.db.{k:03d}"), "wb") as out:
+            with open(os.path.join(out_dir, f"natrep.db.{k:04d}"), "wb") as out:
                 out.write(chunk)
             k += 1
     config = {"serverMode": "chunked", "requestChunkSize": PAGE_SIZE, "databaseLengthBytes": size,
-              "serverChunkSize": CHUNK_BYTES, "urlPrefix": "natrep.db.", "suffixLength": 3,
+              "serverChunkSize": CHUNK_BYTES, "urlPrefix": "natrep.db.", "suffixLength": 4,
               "cacheBust": time.strftime("%Y%m%d%H%M%S")}
     with open(os.path.join(out_dir, "config.json"), "w") as fh:
         json.dump(config, fh)
