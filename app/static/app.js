@@ -10,6 +10,7 @@
   const AGES = ["18-24", "25-34", "35-44", "45-54", "55+"];
   const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                   set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
+  const loading = (msg) => `<p class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${esc(msg)}</p>`;
   const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200); };
 
   let COUNTRIES = [], META = {};
@@ -467,7 +468,7 @@
     const c = state.center; if (!c || c.lat == null) return;
     const km = +$("#km").value;
     const country = $("#same-country").checked && c.country ? c.country : null;
-    $("#loc-summary").innerHTML = '<span class="muted">Searching…</span>';
+    $("#loc-summary").innerHTML = loading("Finding zip codes…");
     let d;
     try { d = await radius(c.lat, c.lon, km, country); }
     catch (e) { $("#loc-summary").innerHTML = `<div class="note">${esc(e.message)}</div>`; return; }
@@ -480,7 +481,7 @@
 
   async function loadArea({ country, level, value, within }) {
     initMap();
-    $("#loc-summary").innerHTML = '<span class="muted">Loading…</span>';
+    $("#loc-summary").innerHTML = loading("Loading zip codes…");
     const d = await area({ country, level, value, within });
     if (circle) { circle.remove(); circle = null; }
     if (centerMarker) { centerMarker.remove(); centerMarker = null; }
@@ -518,7 +519,10 @@
     const box = $("#loc-results");
     if (q.length < 2) { box.innerHTML = '<p class="hint">Type at least two characters.</p>'; return; }
     const seq = ++searchSeq;
-    const d = await search(q, country, 40);
+    box.innerHTML = loading("Searching…");
+    let d;
+    try { d = await search(q, country, 40); }
+    catch (e) { if (seq === searchSeq) box.innerHTML = `<p class="hint">Search failed: ${esc(e.message)}</p>`; return; }
     if (seq !== searchSeq) return;
     const zipHits = d.results.filter((r) => r.zip.replace(/\s/g, "").toLowerCase().startsWith(q.replace(/\s/g, "").toLowerCase()));
     let html = "";
@@ -550,7 +554,11 @@
     $("#compare-add").addEventListener("change", (e) => { if (!e.target.value) return; const l = store.get("compare", []); l.push(e.target.value); store.set("compare", l.slice(0, 6)); renderCompare(); });
     $("#compare-n").addEventListener("change", () => { store.set("n", +$("#compare-n").value || 1000); renderCompare(); });
     $("#compare-csv").addEventListener("click", downloadCompareCsv);
-    $("#loc-q").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(doSearch, 250); });
+    $("#loc-q").addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      if ($("#loc-q").value.trim().length >= 2) $("#loc-results").innerHTML = loading("Searching…");  // feedback during the debounce too
+      searchTimer = setTimeout(doSearch, 250);
+    });
     $("#loc-country").addEventListener("change", doSearch);
     const syncKm = (v) => { $("#km").value = v; $("#km-range").value = Math.min(100, v); };
     $("#km-range").addEventListener("input", (e) => syncKm(e.target.value));

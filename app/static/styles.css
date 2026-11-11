@@ -150,6 +150,11 @@ details summary { cursor: pointer; color: var(--text-2); font-weight: 600; margi
 .searchbox select { width: 130px; }
 .loc-results { overflow: auto; padding: 4px 12px 20px; }
 .loc-results .hint { color: var(--text-2); }
+.loading { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--text-2); }
+.spinner { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--s1); animation: spin .7s linear infinite; }
+.loc-summary .loading { margin: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
 .loc-results h3 { margin: 14px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 .hit { display: block; width: 100%; text-align: left; border: none; background: none; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
 .hit:hover, .hit.active { background: var(--surface-2); }
