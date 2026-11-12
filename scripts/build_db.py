@@ -278,8 +278,11 @@ def main():
 # The browser reads the database over HTTP, a few pages at a time, so every query must hit an index or a small
 # precomputed table. A full table scan would download most of the file.
 CELLS_PER_DEG = 10          # radius-search grid: 0.1° cells, cell = lat_row * 3600 + lon_col
-PAGE_SIZE = 1024            # recommended by sql.js-httpvfs; requestChunkSize must match
-CHUNK_BYTES = 1024 * 1024  # small chunks: on Cloudflare a Pages Function slices each range out of its chunk
+# Every page the browser reads costs one HTTP round trip, so pages are as big as SQLite allows (64 KB), and each page
+# is its own file. The browser then always asks for whole files, which any static host serves from its cache (Cloudflare
+# Pages ignores Range requests). ~9,600 files today; Pages allows 20,000 per deploy, i.e. a database up to ~1.3 GB.
+PAGE_SIZE = 65536
+CHUNK_BYTES = PAGE_SIZE
 
 
 def finalize(con):
@@ -331,25 +334,31 @@ def finalize(con):
     INSERT OR REPLACE INTO meta VALUES('zip_lens', (SELECT json_group_array(zip_len) FROM (SELECT DISTINCT zip_len FROM zips ORDER BY 1)));
     INSERT OR REPLACE INTO meta VALUES('cells_per_deg', {CELLS_PER_DEG});
     """)
+    # longest run of non-digits a zip starts with (e.g. 3 for Malta's "ATD"): longer word queries skip the zip lookup
+    alpha = max((len(re.match(r"\D*", z).group(0)) for (z,) in con.execute("SELECT zip_norm FROM zips")), default=0)
+    con.execute("INSERT OR REPLACE INTO meta VALUES('zip_alpha_max', ?)", (alpha,))
     con.commit()
     con.executescript(f"PRAGMA journal_mode=DELETE; PRAGMA page_size={PAGE_SIZE}; VACUUM; ANALYZE;")
 
 
 def export_for_web(db_path, out_dir):
-    """Split the database into chunks the browser fetches with HTTP range requests, plus config.json."""
+    """Split the database into one file per page for the browser (sql.js-httpvfs "chunked" mode), plus config.json."""
     os.makedirs(out_dir, exist_ok=True)
     for f in os.listdir(out_dir):
         if f.startswith("natrep.db.") or f == "config.json":
             os.remove(os.path.join(out_dir, f))
     size = os.path.getsize(db_path)
+    digits = max(4, len(str((size - 1) // CHUNK_BYTES)))
     with open(db_path, "rb") as fh:
         k = 0
         while chunk := fh.read(CHUNK_BYTES):
-            with open(os.path.join(out_dir, f"natrep.db.{k:04d}"), "wb") as out:
+            with open(os.path.join(out_dir, f"natrep.db.{k:0{digits}d}"), "wb") as out:
                 out.write(chunk)
             k += 1
     config = {"serverMode": "chunked", "requestChunkSize": PAGE_SIZE, "databaseLengthBytes": size,
-              "serverChunkSize": CHUNK_BYTES, "urlPrefix": "natrep.db.", "suffixLength": 4,
+              "serverChunkSize": CHUNK_BYTES, "urlPrefix": "natrep.db.", "suffixLength": digits,
+              # one page per file, so read-ahead (several pages per request) can't apply; see vendor/sql-httpvfs/PATCHES.md
+              "maxReadSpeed": PAGE_SIZE,
               "cacheBust": time.strftime("%Y%m%d%H%M%S")}
     with open(os.path.join(out_dir, "config.json"), "w") as fh:
         json.dump(config, fh)

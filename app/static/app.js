@@ -42,6 +42,7 @@
     m.zip_lens = parse(m.zip_lens, []);
     m.zip_rows = +m.zip_rows;
     m.cells_per_deg = +m.cells_per_deg;
+    m.zip_alpha_max = m.zip_alpha_max == null ? Infinity : +m.zip_alpha_max;
     m.countries = (await rows("SELECT count(*) n FROM countries"))[0].n;
     return m;
   }
@@ -90,7 +91,9 @@
     // 1) zip codes starting with the query, shortest first: one index range per zip length
     const zq = q.replace(/\s+/g, "").replace(/[%_]/g, "");
     const results = [];
-    if (zq) for (const len of META.zip_lens.filter((l) => l >= zq.length)) {
+    // no zip starts with more than zip_alpha_max non-digits, so a word like "Berlin" can't be a zip prefix
+    const maybeZip = zq && zq.match(/^\D*/)[0].length <= META.zip_alpha_max;
+    if (maybeZip) for (const len of META.zip_lens.filter((l) => l >= zq.length)) {
       results.push(...await rows(`SELECT id, ${COLS} FROM zips WHERE zip_len = ? AND zip_norm LIKE ?${cw} ORDER BY zip_norm LIMIT ?`,
         [len, zq + "%", ...ca, limit - results.length]));
       if (results.length >= limit) break;
