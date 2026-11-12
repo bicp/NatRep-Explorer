@@ -23,9 +23,9 @@ so only the parts a search needs are downloaded.
 2. Mac/Linux: `./run.sh`  ·  Windows: double-click `run.bat`
 3. Open http://localhost:8000
 
-The first start converts the workbook into `data/natrep.db` (SQLite, ~1–2 minutes) and publishes it as chunks in
-`app/static/db/` (plus `config.json`). After that it starts instantly. `scripts/serve.py` is a small static server
-that supports HTTP Range requests, which the browser needs to read the database (Python's built-in server doesn't).
+The first start converts the workbook into `data/natrep.db` (SQLite, ~1 minute) and publishes it in `app/static/db/`
+as one file per 64 KB database page (plus `config.json`). After that it starts instantly. `scripts/serve.py` is a
+small static server.
 
 ## Updating the data
 
@@ -46,9 +46,8 @@ are picked up automatically as long as they follow the existing layout.
 
 ## Deploy to Cloudflare Pages
 
-`app/static/` is the whole site once the database is built, plus one small Pages Function,
-[`functions/db/[[path]].js`](functions/db/[[path]].js): Cloudflare Pages ignores HTTP Range requests on static files,
-so the function returns just the requested bytes of each database chunk. The GitHub Actions workflow
+`app/static/` is the whole site once the database is built – plain static files, no server code. The GitHub Actions
+workflow
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the database from the workbook in `data/` and
 uploads the site with Wrangler (Cloudflare's CLI). The free Cloudflare plan is enough.
 
@@ -85,13 +84,6 @@ Preview deploys never touch production. They use the same Cloudflare project, so
    `natrep-explorer.pages.dev` and `*.natrep-explorer.pages.dev` (preview deploys), and a policy such as
    "emails ending in @yourcompany.com". Free for up to 50 users.
 
-After the first deploy, check that the function serves byte ranges – the app can't read the database without them.
-Expect `HTTP/2 206` (run it before step 5, or with an Access service token, since Access blocks plain `curl`):
-
-```bash
-curl -s -D - -o /dev/null -H "Range: bytes=5000-6023" https://natrep-explorer.pages.dev/db/natrep.db.0001 | head -1
-```
-
 ### Deploy by hand
 
 Without the pipeline – e.g. to try something quickly – build locally (`./run.sh`, then Ctrl+C) and upload. Run it
@@ -111,11 +103,9 @@ mix old and new database files and show "database disk image is malformed".
 
 ### Limits
 
-Pages allows files up to 25 MiB and 20,000 files per deploy. The database is published in 1 MB chunks
-(`CHUNK_BYTES` in `scripts/build_db.py`; ~630 files today), so there is room for a database up to ~19 GB.
-Every database read goes through the Pages Function, and Functions share the Workers request allowance: 100,000
-requests a day on the free plan. Opening the app takes ~20 requests and a search ~50–130, so that covers roughly
-1,000 searches a day; the Workers Paid plan ($5/month) raises it to 10 million a month.
+Pages allows 20,000 files per deploy. The database is published as one file per 64 KB page (`PAGE_SIZE` in
+`scripts/build_db.py`; ~9,600 files today), so it fits up to ~1.3 GB – about twice today's size. If the workbook
+grows past that, the database would need to move to R2 (Cloudflare's file storage, which serves byte ranges).
 GitHub rejects files over 100 MB; the workbook is ~75 MB today. If it grows past that, move it to Git LFS.
 
 ## Data notes
@@ -133,15 +123,15 @@ GitHub rejects files over 100 MB; the workbook is ~75 MB today. If it grows past
 
 ```
 app/static/              The whole app: index.html, styles.css, app.js, vendored Leaflet, Chart.js and sql.js-httpvfs
-app/static/db/           Built database chunks + config.json (generated, not in git)
-scripts/build_db.py      Workbook → SQLite importer; adds the indexes and lookup tables the browser queries, then splits
-                         the file into chunks
-scripts/serve.py         Local static server with HTTP Range support
+app/static/db/           Built database, one file per 64 KB page, + config.json (generated, not in git)
+scripts/build_db.py      Workbook → SQLite importer; adds the indexes and lookup tables the browser queries, then writes
+                         one file per page
+scripts/serve.py         Local static server
 data/                    The source workbook (in git) and the built natrep.db (not in git)
 .github/workflows/       deploy.yml – builds the database and deploys to Cloudflare Pages
-functions/db/[[path]].js Pages Function that answers Range requests for the database chunks
 ```
 
-The browser reads the database a few KB at a time, so every query in `app.js` must use an index or a precomputed
-table (`places`, `regions`, `meta`). Check new queries with `EXPLAIN QUERY PLAN` – a `SCAN zips` would download most
-of the file.
+The browser reads the database one 64 KB page (one request) at a time, so every query in `app.js` must use an index
+or a precomputed table (`places`, `regions`, `meta`). Check new queries with `EXPLAIN QUERY PLAN` – a `SCAN zips`
+would download most of the file. The vendored sql.js-httpvfs has two small patches, described in
+`app/static/vendor/sql-httpvfs/PATCHES.md`.
