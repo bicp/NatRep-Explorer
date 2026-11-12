@@ -53,9 +53,15 @@ so the function returns just the requested bytes of each database chunk. The Git
 uploads the site with Wrangler (Cloudflare's CLI). The free Cloudflare plan is enough.
 
 - **Push or merge to `main`** → production deploy at `https://natrep-explorer.pages.dev`.
-- **Actions → Deploy to Cloudflare Pages → Run workflow** on any branch → preview deploy at
-  `https://<branch>.natrep-explorer.pages.dev`. (The *Run workflow* button only appears once the workflow file is on
-  `main`.)
+- **Open or update a pull request** → preview deploy at `https://<branch>.natrep-explorer.pages.dev` (Cloudflare
+  lowercases the branch name and replaces `/` and other symbols with `-`, e.g. `perf/faster-search` →
+  `perf-faster-search`). The workflow comments the link on the pull request and updates that comment on every push.
+  The preview is built from the pull request merged into `main`, so it shows what production will look like after
+  merging. Pull requests from forks are skipped, since they don't get the Cloudflare secrets.
+- **Actions → Deploy to Cloudflare Pages → Run workflow** on any branch → preview deploy of that branch.
+
+Preview deploys never touch production. They use the same Cloudflare project, so the Access policy on
+`*.natrep-explorer.pages.dev` (step 5 below) protects them too.
 
 ### One-time setup
 
