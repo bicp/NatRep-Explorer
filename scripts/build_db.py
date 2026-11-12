@@ -1,14 +1,16 @@
-"""Build data/natrep.db from the Global Nat Rep + Zip Codes workbook.
+"""Build data/natrep.db from the Global Nat Rep + Zip Codes workbook and publish it for the browser.
 
-Usage:  python scripts/build_db.py path/to/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx [data/natrep.db]
+Usage:  python scripts/build_db.py path/to/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx [data/natrep.db] [app/static/db]
 
-Re-run whenever the workbook is updated; the database is rebuilt from scratch.
+Re-run whenever the workbook is updated; the database is rebuilt from scratch and split into chunks in
+app/static/db/ (plus config.json), which the browser reads with HTTP range requests.
 """
 import json, math, os, re, sqlite3, sys, time
 import openpyxl
 
 XLSX = sys.argv[1] if len(sys.argv) > 1 else "Global_Nat_Rep_and_Zip_Codes_Combined.xlsx"
 DB = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(__file__), "..", "data", "natrep.db")
+WEB_DIR = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), "..", "app", "static", "db")
 
 ISO2 = {
  "Argentina":"AR","Australia":"AU","Austria":"AT","Belgium":"BE","Brazil":"BR","Bulgaria":"BG","Canada":"CA","Chile":"CL",
@@ -267,19 +269,91 @@ def main():
         print(f"  {sheet}: done ({total:,} total, {round(time.time() - t0)}s)")
 
     print("indexing…")
-    con.executescript("""
-    UPDATE zips SET lat=NULL, lon=NULL WHERE lat IS NULL OR lon IS NULL OR abs(lat)>90 OR abs(lon)>180 OR (lat=0 AND lon=0);
-    UPDATE countries SET has_coords=(SELECT count(*)>0 FROM zips z WHERE z.country=countries.name AND z.lat IS NOT NULL);
-    CREATE INDEX zips_country ON zips(country);
-    CREATE INDEX zips_zip ON zips(zip COLLATE NOCASE);
-    CREATE VIRTUAL TABLE zips_geo USING rtree(id, minlat, maxlat, minlon, maxlon);
-    INSERT INTO zips_geo SELECT id, lat, lat, lon, lon FROM zips WHERE lat IS NOT NULL;
-    CREATE VIRTUAL TABLE zips_fts USING fts5(zip, place, admin1, admin2, admin3, country, content='zips', content_rowid='id', tokenize="unicode61 remove_diacritics 2", prefix='2 3 4');
-    INSERT INTO zips_fts(rowid, zip, place, admin1, admin2, admin3, country) SELECT id, zip, place, admin1, admin2, admin3, country FROM zips;
-    """)
-    con.commit(); con.execute("VACUUM"); con.close()
+    finalize(con)
+    con.close()
+    export_for_web(DB, WEB_DIR)
     print(f"done: {total:,} zip rows, {len(countries)} countries, {round(time.time() - t0)}s, {os.path.getsize(DB) / 1e6:.0f} MB")
 
+
+# The browser reads the database over HTTP, a few pages at a time, so every query must hit an index or a small
+# precomputed table. A full table scan would download most of the file.
+CELLS_PER_DEG = 10          # radius-search grid: 0.1° cells, cell = lat_row * 3600 + lon_col
+PAGE_SIZE = 1024            # recommended by sql.js-httpvfs; requestChunkSize must match
+CHUNK_BYTES = 1024 * 1024  # small chunks: on Cloudflare a Pages Function slices each range out of its chunk
+
+
+def finalize(con):
+    """Clean coordinates, store zips in grid-cell order and build the lookup tables the browser queries."""
+    rows, cols = 180 * CELLS_PER_DEG, 360 * CELLS_PER_DEG
+    con.executescript(f"""
+    UPDATE zips SET lat=NULL, lon=NULL WHERE lat IS NULL OR lon IS NULL OR abs(lat)>90 OR abs(lon)>180 OR (lat=0 AND lon=0);
+    UPDATE countries SET has_coords=(SELECT count(*)>0 FROM zips z WHERE z.country=countries.name AND z.lat IS NOT NULL);
+
+    -- nearby zips sit next to each other in the file, so a radius search reads a few contiguous ranges
+    CREATE TABLE zips_sorted(id INTEGER PRIMARY KEY, country TEXT, iso2 TEXT, zip TEXT, place TEXT, admin1 TEXT,
+        admin2 TEXT, admin3 TEXT, lat REAL, lon REAL, extra TEXT, cell INT, zip_norm TEXT COLLATE NOCASE, zip_len INT);
+    INSERT INTO zips_sorted(country, iso2, zip, place, admin1, admin2, admin3, lat, lon, extra, cell, zip_norm, zip_len)
+      SELECT country, iso2, zip, place, admin1, admin2, admin3, lat, lon, extra,
+             CASE WHEN lat IS NULL THEN NULL ELSE
+               min(CAST((lat + 90) * {CELLS_PER_DEG} AS INT), {rows - 1}) * {cols} + min(CAST((lon + 180) * {CELLS_PER_DEG} AS INT), {cols - 1})
+             END AS cell,
+             replace(zip, ' ', ''), length(zip)
+      FROM zips ORDER BY cell IS NULL, cell, country, id;
+    DROP TABLE zips;
+    ALTER TABLE zips_sorted RENAME TO zips;
+    CREATE INDEX zips_cell ON zips(cell);
+    -- covering index: the zip search reads matches straight from the index instead of one row page per hit
+    CREATE INDEX zips_zip ON zips(zip_len, zip_norm, country, iso2, zip, place, admin1, admin2, admin3, lat, lon);
+    CREATE INDEX zips_admin1 ON zips(country, admin1);
+    CREATE INDEX zips_admin2 ON zips(country, admin2);
+    CREATE INDEX zips_place ON zips(country, place);
+
+    -- one row per city / place (country, place, admin1), most zips first so FTS can stop after the first hits
+    CREATE TABLE places(id INTEGER PRIMARY KEY, country TEXT, iso2 TEXT, place TEXT COLLATE NOCASE, admin1 TEXT,
+        admin2 TEXT, zips INT, lat REAL, lon REAL, first_zip TEXT);
+    INSERT INTO places(country, iso2, place, admin1, admin2, zips, lat, lon, first_zip)
+      SELECT country, iso2, place, admin1, admin2, count(DISTINCT zip) n, avg(lat), avg(lon), min(zip)
+      FROM zips WHERE place <> '' GROUP BY country, place, admin1 ORDER BY n DESC, country, place;
+    CREATE INDEX places_place ON places(place, country, id, iso2, admin1, admin2, zips, lat, lon, first_zip);
+    CREATE VIRTUAL TABLE places_fts USING fts5(place, country, content='places', content_rowid='id',
+        tokenize="unicode61 remove_diacritics 2", prefix='2 3 4');
+    INSERT INTO places_fts(rowid, place, country) SELECT id, place, country FROM places;
+    INSERT INTO places_fts(places_fts) VALUES('optimize');
+
+    -- state / region and province / county names with record counts
+    CREATE TABLE regions(country TEXT, level TEXT, value TEXT COLLATE NOCASE, n INT);
+    INSERT INTO regions SELECT country, 'admin1', admin1, count(*) FROM zips WHERE admin1 <> '' GROUP BY country, admin1;
+    INSERT INTO regions SELECT country, 'admin2', admin2, count(*) FROM zips WHERE admin2 <> '' GROUP BY country, admin2;
+    CREATE INDEX regions_value ON regions(level, value, country, n);
+    CREATE INDEX regions_country ON regions(country, level);
+
+    INSERT OR REPLACE INTO meta VALUES('zip_rows', (SELECT count(*) FROM zips));
+    INSERT OR REPLACE INTO meta VALUES('zip_lens', (SELECT json_group_array(zip_len) FROM (SELECT DISTINCT zip_len FROM zips ORDER BY 1)));
+    INSERT OR REPLACE INTO meta VALUES('cells_per_deg', {CELLS_PER_DEG});
+    """)
+    con.commit()
+    con.executescript(f"PRAGMA journal_mode=DELETE; PRAGMA page_size={PAGE_SIZE}; VACUUM; ANALYZE;")
+
+
+def export_for_web(db_path, out_dir):
+    """Split the database into chunks the browser fetches with HTTP range requests, plus config.json."""
+    os.makedirs(out_dir, exist_ok=True)
+    for f in os.listdir(out_dir):
+        if f.startswith("natrep.db.") or f == "config.json":
+            os.remove(os.path.join(out_dir, f))
+    size = os.path.getsize(db_path)
+    with open(db_path, "rb") as fh:
+        k = 0
+        while chunk := fh.read(CHUNK_BYTES):
+            with open(os.path.join(out_dir, f"natrep.db.{k:04d}"), "wb") as out:
+                out.write(chunk)
+            k += 1
+    config = {"serverMode": "chunked", "requestChunkSize": PAGE_SIZE, "databaseLengthBytes": size,
+              "serverChunkSize": CHUNK_BYTES, "urlPrefix": "natrep.db.", "suffixLength": 4,
+              "cacheBust": time.strftime("%Y%m%d%H%M%S")}
+    with open(os.path.join(out_dir, "config.json"), "w") as fh:
+        json.dump(config, fh)
+    print(f"web files: {k} chunks in {out_dir}")
 
 if __name__ == "__main__":
     main()

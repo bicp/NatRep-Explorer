@@ -1,4 +1,6 @@
 data/*.db
-data/*.xlsx
 __pycache__/
 .venv/
+app/static/db/
+.wrangler/
+.DS_Store

@@ -15,37 +15,102 @@ Light and dark mode: follows the computer's setting by default; the sun/moon but
 
 ## Run it locally
 
-Requires Python 3.10+.
+Requires Python 3.10+. Everything runs in the browser: there is no backend. The workbook is converted into a SQLite
+database that the browser reads in small pieces over HTTP (with [sql.js-httpvfs](https://github.com/phiresky/sql.js-httpvfs)),
+so only the parts a search needs are downloaded.
 
-1. Copy the workbook into `data/` (keep the name `Global_Nat_Rep_and_Zip_Codes_Combined.xlsx`).
+1. The workbook is in the repo at `data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx` (keep that name when replacing it).
 2. Mac/Linux: `./run.sh`  ·  Windows: double-click `run.bat`
 3. Open http://localhost:8000
 
-The first start converts the workbook into `data/natrep.db` (SQLite, ~1–2 minutes). After that it starts instantly.
-
-## Share it with the team
-
-Run it on any always-on machine or small VM the team can reach, e.g. with Docker:
-
-```bash
-cp /path/to/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/
-docker build -t natrep-explorer .
-docker run -d -p 8000:8000 --name natrep natrep-explorer
-```
-
-There is no login built in – host it on the internal network/VPN, or put it behind your SSO proxy.
+The first start converts the workbook into `data/natrep.db` (SQLite, ~1–2 minutes) and publishes it as chunks in
+`app/static/db/` (plus `config.json`). After that it starts instantly. `scripts/serve.py` is a small static server
+that supports HTTP Range requests, which the browser needs to read the database (Python's built-in server doesn't).
 
 ## Updating the data
 
-When the workbook changes, replace the file in `data/` and rebuild:
+1. Replace `data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx` with the new workbook (same name).
+2. Check it locally: `./run.sh` (or `run.bat`) rebuilds automatically when the workbook is newer than the published
+   database.
+3. Commit the workbook and merge to `main` – the pipeline rebuilds the database and deploys it (see below).
+
+To rebuild without starting the server:
 
 ```bash
-python scripts/build_db.py data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/natrep.db
+.venv/bin/python scripts/build_db.py data/Global_Nat_Rep_and_Zip_Codes_Combined.xlsx data/natrep.db app/static/db
 ```
 
-(`run.sh` rebuilds automatically when the workbook is newer than the database; with Docker, rebuild the image.)
+`.venv/` is created by `run.sh` on the first build and holds the importer's only dependency, `openpyxl`.
 The importer reads the **Home** tab to find each country's Nat Rep and ZIP tabs, so new countries added there
 are picked up automatically as long as they follow the existing layout.
+
+## Deploy to Cloudflare Pages
+
+`app/static/` is the whole site once the database is built, plus one small Pages Function,
+[`functions/db/[[path]].js`](functions/db/[[path]].js): Cloudflare Pages ignores HTTP Range requests on static files,
+so the function returns just the requested bytes of each database chunk. The GitHub Actions workflow
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the database from the workbook in `data/` and
+uploads the site with Wrangler (Cloudflare's CLI). The free Cloudflare plan is enough.
+
+- **Push or merge to `main`** → production deploy at `https://natrep-explorer.pages.dev`.
+- **Actions → Deploy to Cloudflare Pages → Run workflow** on any branch → preview deploy at
+  `https://<branch>.natrep-explorer.pages.dev`. (The *Run workflow* button only appears once the workflow file is on
+  `main`.)
+
+### One-time setup
+
+1. **Create the Pages project.** In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Upload assets**,
+   name it `natrep-explorer`, and skip the upload. Or from a terminal with Node.js:
+   ```bash
+   npx wrangler login
+   npx wrangler pages project create natrep-explorer --production-branch main
+   ```
+2. **Create an API token.** Dashboard → **My Profile → API Tokens → Create Token → Create Custom Token**:
+   - Permissions: **Account · Cloudflare Pages · Edit**
+   - Account resources: **Include · *your account***
+   - Copy the token – it is shown once.
+3. **Find your account ID.** Dashboard → **Workers & Pages**: *Account ID* in the right-hand column (also in the URL
+   after `dash.cloudflare.com/`).
+4. **Add both as GitHub secrets.** Repo → **Settings → Secrets and variables → Actions → New repository secret**:
+   - `CLOUDFLARE_API_TOKEN` – the token from step 2
+   - `CLOUDFLARE_ACCOUNT_ID` – the ID from step 3
+5. **Add a login.** There is none built in, and anyone who can open the site can download the whole database.
+   Dashboard → **Zero Trust → Access → Applications → Add an application → Self-hosted**, add
+   `natrep-explorer.pages.dev` and `*.natrep-explorer.pages.dev` (preview deploys), and a policy such as
+   "emails ending in @yourcompany.com". Free for up to 50 users.
+
+After the first deploy, check that the function serves byte ranges – the app can't read the database without them.
+Expect `HTTP/2 206` (run it before step 5, or with an Access service token, since Access blocks plain `curl`):
+
+```bash
+curl -s -D - -o /dev/null -H "Range: bytes=5000-6023" https://natrep-explorer.pages.dev/db/natrep.db.0001 | head -1
+```
+
+### Deploy by hand
+
+Without the pipeline – e.g. to try something quickly – build locally (`./run.sh`, then Ctrl+C) and upload. Run it
+from the repo root so Wrangler also picks up `functions/`:
+
+```bash
+npx wrangler pages deploy app/static --project-name natrep-explorer --branch main
+```
+
+Use another `--branch` name for a preview deploy instead of production.
+
+### Rolling back and open tabs
+
+Each deploy replaces the whole site; earlier deploys stay listed under **Workers & Pages → natrep-explorer →
+Deployments**, where you can roll back. Tabs that were open before a data update must be reloaded: until then they
+mix old and new database files and show "database disk image is malformed".
+
+### Limits
+
+Pages allows files up to 25 MiB and 20,000 files per deploy. The database is published in 1 MB chunks
+(`CHUNK_BYTES` in `scripts/build_db.py`; ~630 files today), so there is room for a database up to ~19 GB.
+Every database read goes through the Pages Function, and Functions share the Workers request allowance: 100,000
+requests a day on the free plan. Opening the app takes ~20 requests and a search ~50–130, so that covers roughly
+1,000 searches a day; the Workers Paid plan ($5/month) raises it to 10 million a month.
+GitHub rejects files over 100 MB; the workbook is ~75 MB today. If it grows past that, move it to Git LFS.
 
 ## Data notes
 
@@ -61,11 +126,16 @@ are picked up automatically as long as they follow the existing layout.
 ## Project layout
 
 ```
-app/main.py          FastAPI backend (JSON API + serves the UI)
-app/static/          UI: index.html, styles.css, app.js, vendored Leaflet + Chart.js
-scripts/build_db.py  Workbook → SQLite importer (R*Tree index for radius, FTS5 for search)
+app/static/              The whole app: index.html, styles.css, app.js, vendored Leaflet, Chart.js and sql.js-httpvfs
+app/static/db/           Built database chunks + config.json (generated, not in git)
+scripts/build_db.py      Workbook → SQLite importer; adds the indexes and lookup tables the browser queries, then splits
+                         the file into chunks
+scripts/serve.py         Local static server with HTTP Range support
+data/                    The source workbook (in git) and the built natrep.db (not in git)
+.github/workflows/       deploy.yml – builds the database and deploys to Cloudflare Pages
+functions/db/[[path]].js Pages Function that answers Range requests for the database chunks
 ```
 
-API: `/api/countries`, `/api/countries/{name}`, `/api/search?q=`, `/api/radius?lat=&lon=&km=`,
-`/api/radius.csv`, `/api/area?country=&level=admin1|admin2|place&value=`, `/api/area.csv`.
-Interactive docs at `/docs`.
+The browser reads the database a few KB at a time, so every query in `app.js` must use an index or a precomputed
+table (`places`, `regions`, `meta`). Check new queries with `EXPLAIN QUERY PLAN` – a `SCAN zips` would download most
+of the file.

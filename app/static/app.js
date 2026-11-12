@@ -4,18 +4,172 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const api = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText); return r.json(); };
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const pct = (v, d = 1) => (v == null || isNaN(v) ? "–" : (v * 100).toFixed(d) + "%");
   const int = (v) => (v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("en-GB"));
-  const qs = (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== null && v !== undefined && v !== "")).toString();
+  const DEFAULT_COUNTRY = "Australia";  // opened when the site is visited without a page in the URL
   const AGES = ["18-24", "25-34", "35-44", "45-54", "55+"];
   const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                   set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
+  const loading = (msg) => `<p class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${esc(msg)}</p>`;
   const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200); };
 
   let COUNTRIES = [], META = {};
   const charts = {};
+
+  // ------------------------------------------------------------------ data (SQLite in the browser)
+  // scripts/build_db.py publishes the database as chunks in db/; sql.js-httpvfs reads only the pages each query needs
+  // with HTTP range requests. These functions return the same shapes the old FastAPI endpoints did.
+  const MAX_RADIUS_KM = 500, MAX_ROWS = 50000;
+  const abs = (p) => new URL(p, location.href).href;
+  let dbp;
+  function database() {
+    return (dbp ||= (async () => {
+      const r = await fetch("db/config.json", { cache: "no-cache" });
+      if (!r.ok) throw new Error("database not found – build it with scripts/build_db.py (see README)");
+      const config = await r.json();
+      config.urlPrefix = abs("db/" + config.urlPrefix);
+      return createDbWorker([{ from: "inline", config }], abs("vendor/sql-httpvfs/sqlite.worker.js"), abs("vendor/sql-httpvfs/sql-wasm.wasm"));
+    })());
+  }
+  const rows = async (sql, args = []) => (await database()).db.query(sql, args);
+  const parse = (v, d) => (v == null ? d : JSON.parse(v));
+  const COLS = "country, iso2, zip, place, admin1, admin2, admin3, lat, lon";
+
+  async function getMeta() {
+    const m = Object.fromEntries((await rows("SELECT key, value FROM meta")).map((r) => [r.key, r.value]));
+    m.hhi_columns = parse(m.hhi_columns, []);
+    m.zip_lens = parse(m.zip_lens, []);
+    m.zip_rows = +m.zip_rows;
+    m.cells_per_deg = +m.cells_per_deg;
+    m.countries = (await rows("SELECT count(*) n FROM countries"))[0].n;
+    return m;
+  }
+
+  async function getCountries() {
+    const out = await rows("SELECT name, iso2, zip_records, internet, has_coords, notes, layout FROM countries ORDER BY name");
+    const ag = await rows("SELECT country, gender, age, share FROM age_gender");
+    const ed = await rows("SELECT country, level, share FROM education WHERE classification LIKE 'ISCED%' ORDER BY ord");
+    const hhi = Object.fromEntries((await rows("SELECT country, data_json FROM refs WHERE kind='hhi'")).map((r) => [r.country, JSON.parse(r.data_json)]));
+    for (const c of out) {
+      const mine = ag.filter((a) => a.country === c.name);
+      c.male = mine.filter((a) => a.gender === "Male").reduce((s, a) => s + (a.share || 0), 0);
+      c.age = {};
+      for (const a of mine) c.age[a.age] = (c.age[a.age] || 0) + (a.share || 0);
+      c.tertiary = ed.find((x) => x.country === c.name && x.level.toLowerCase().startsWith("tertiary"))?.share ?? null;
+      const h = hhi[c.name] || {};
+      c.hhi_median_eur = h["Median EUR Est"] ?? null;
+      c.hhi_confidence = h.Confidence ?? null;
+    }
+    return out;
+  }
+
+  async function getCountry(name) {
+    const [c] = await rows("SELECT * FROM countries WHERE name = ?", [name]);
+    if (!c) throw new Error("Unknown country");
+    c.warnings = JSON.parse(c.warnings || "[]");
+    c.home_note = c.notes;
+    c.age_gender = await rows("SELECT gender, age, share FROM age_gender WHERE country=? ORDER BY gender DESC, age", [name]);
+    c.education = await rows("SELECT classification, level, share FROM education WHERE country=? ORDER BY ord", [name]);
+    c.income = await rows("SELECT band, lower, upper, share, currency, year, definition, source, confidence, base FROM income WHERE country=? ORDER BY ord", [name]);
+    c.notes = (await rows("SELECT text FROM notes WHERE country=? ORDER BY ord", [name])).map((r) => r.text);
+    c.extras = (await rows("SELECT title, source_sheet, rows_json FROM extras WHERE country=? ORDER BY ord", [name]))
+      .map((r) => ({ title: r.title, sheet: r.source_sheet, rows: JSON.parse(r.rows_json) }));
+    const ref = Object.fromEntries((await rows("SELECT kind, data_json FROM refs WHERE country=?", [name])).map((r) => [r.kind, JSON.parse(r.data_json)]));
+    c.hhi = ref.hhi ?? null;
+    c.sources = ref.sources ?? null;
+    c.regions = await rows("SELECT value admin1, n FROM regions WHERE country=? AND level='admin1' ORDER BY value COLLATE BINARY", [name]);
+    return c;
+  }
+
+  const ftsQuery = (q) => (q.match(/[\p{L}\p{N}_]+/gu) || []).map((t) => `"${t}"*`).join(" ");
+
+  async function search(q, country, limit = 60) {
+    q = q.trim();
+    const cw = country ? " AND country = ?" : "", ca = country ? [country] : [];
+    // 1) zip codes starting with the query, shortest first: one index range per zip length
+    const zq = q.replace(/\s+/g, "").replace(/[%_]/g, "");
+    const results = [];
+    if (zq) for (const len of META.zip_lens.filter((l) => l >= zq.length)) {
+      results.push(...await rows(`SELECT id, ${COLS} FROM zips WHERE zip_len = ? AND zip_norm LIKE ?${cw} ORDER BY zip_norm LIMIT ?`,
+        [len, zq + "%", ...ca, limit - results.length]));
+      if (results.length >= limit) break;
+    }
+    // 2) cities / places: exact name first, then FTS prefix matches by number of zips (places are stored in that order)
+    const ft = ftsQuery(q);
+    let places = [];
+    if (ft) {
+      const P = "p.id, p.country, p.iso2, p.place, p.admin1, p.admin2, p.zips, p.lat, p.lon, p.first_zip";
+      places = await rows(`SELECT ${P} FROM places p WHERE p.place = ?${country ? " AND p.country = ?" : ""} ORDER BY p.id LIMIT 15`, [q, ...ca]);
+      const match = `place : (${ft})` + (country ? ` AND country : "${country.replace(/"/g, '""')}"` : "");
+      const more = await rows(`SELECT ${P} FROM places_fts f JOIN places p ON p.id = f.rowid WHERE places_fts MATCH ?${country ? " AND p.country = ?" : ""}
+                               ORDER BY f.rowid LIMIT ?`, [match, ...ca, 15 + places.length]);
+      const seen = new Set(places.map((p) => p.id));
+      for (const p of more) if (!seen.has(p.id) && places.length < 15) { places.push(p); seen.add(p.id); }
+    }
+    // 3) state / region and province / county names
+    const regions = [];
+    if (q.length >= 2) for (const level of ["admin1", "admin2"])
+      regions.push(...await rows(`SELECT country, level, value, n FROM regions WHERE level = ? AND value LIKE ?${cw} ORDER BY n DESC LIMIT 8`, [level, q + "%", ...ca]));
+    return { results, places, regions: regions.slice(0, 12) };
+  }
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    const rad = Math.PI / 180, p1 = lat1 * rad, p2 = lat2 * rad, dp = p2 - p1, dl = (lon2 - lon1) * rad;
+    const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+    return 2 * 6371.0088 * Math.asin(Math.sqrt(a));
+  }
+
+  async function radius(lat, lon, km, country) {
+    if (!(km > 0 && km <= MAX_RADIUS_KM)) throw new Error(`Radius must be between 0 and ${MAX_RADIUS_KM} km`);
+    const dlat = km / 110.574, dlon = km / (111.320 * Math.max(Math.cos(lat * Math.PI / 180), 0.01));
+    // zips are stored by grid cell (row * cols + col); each grid row of the bounding box is one contiguous cell range
+    const C = META.cells_per_deg, nrows = 180 * C, ncols = 360 * C;
+    const cell = (v, off, n) => Math.min(Math.max(Math.floor((v + off) * C), 0), n - 1);
+    const r0 = cell(lat - dlat, 90, nrows), r1 = cell(lat + dlat, 90, nrows), c0 = cell(lon - dlon, 180, ncols), c1 = cell(lon + dlon, 180, ncols);
+    const ranges = [], args = [];
+    for (let r = r0; r <= r1; r++) { ranges.push("cell BETWEEN ? AND ?"); args.push(r * ncols + c0, r * ncols + c1); }
+    args.push(lat - dlat, lat + dlat, lon - dlon, lon + dlon, ...(country ? [country] : []));
+    // "+country" keeps SQLite on the cell index instead of scanning the whole country
+    const cand = await rows(`SELECT ${COLS} FROM zips WHERE (${ranges.join(" OR ")})
+                             AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?${country ? " AND +country = ?" : ""}`, args);
+    const byZip = new Map();
+    for (const r of cand) {
+      const d = haversine(lat, lon, r.lat, r.lon);
+      if (d > km) continue;
+      const key = r.country + "\u0000" + r.zip, cur = byZip.get(key);
+      if (!cur) { r.distance_km = Math.round(d * 100) / 100; r.places = r.place ? [r.place] : []; byZip.set(key, r); continue; }
+      if (r.place && !cur.places.includes(r.place)) cur.places.push(r.place);
+      if (d < cur.distance_km) { for (const k of ["place", "admin1", "admin2", "admin3", "lat", "lon"]) cur[k] = r[k]; cur.distance_km = Math.round(d * 100) / 100; }
+    }
+    const out = [...byZip.values()].sort((a, b) => a.distance_km - b.distance_km);
+    const results = out.slice(0, MAX_ROWS);
+    return { center: { lat, lon }, km, count: results.length, truncated: out.length > MAX_ROWS, results };
+  }
+
+  async function area({ country, level = "admin1", value = "", within }) {
+    if (!["admin1", "admin2", "admin3", "place"].includes(level)) throw new Error("bad level");
+    const nested = within && level !== "admin1";
+    const results = await rows(`SELECT country, iso2, zip, group_concat(DISTINCT place) places, min(place) place, admin1, admin2, admin3,
+                                avg(lat) lat, avg(lon) lon FROM zips WHERE country=? AND ${level}=?${nested ? " AND admin1=?" : ""}
+                                GROUP BY zip ORDER BY zip LIMIT ?`, [country, value, ...(nested ? [within] : []), MAX_ROWS]);
+    for (const r of results) r.places = (r.places || "").split(",");
+    return { country, level, value, count: results.length, results };
+  }
+
+  function download(text, filename) {
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob(["﻿" + text], { type: "text/csv" })), download: filename });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  const safeName = (s, n) => s.replace(/[^\p{L}\p{N}_-]+/gu, "_").slice(0, n);
+  function zipsCsv(res, filename) {
+    const cell = (v) => { v = String(v ?? ""); return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+    const cols = ["country", "zip", "place", "admin1", "admin2", "admin3", "lat", "lon", "distance_km", "places"];
+    const lines = [["Country", "Zip code", "Place", "State / Region", "Province / County", "Community", "Latitude", "Longitude", "Distance (km)", "All places in zip"]];
+    for (const r of res) lines.push(cols.map((c) => (c === "places" ? (r.places || []).join("; ") : r[c])));
+    download(lines.map((l) => l.map(cell).join(",")).join("\r\n") + "\r\n", filename);
+  }
   function chart(id, cfg) {
     if (charts[id]) charts[id].destroy();
     const el = document.getElementById(id);
@@ -43,7 +197,7 @@
     const v = ["country", "compare", "locations"].includes(view) ? view : "country";
     $$(".view").forEach((el) => el.classList.toggle("active", el.id === "view-" + v));
     $$(".tabs a").forEach((a) => a.classList.toggle("active", a.dataset.view === v));
-    if (v === "country") showCountry(decodeURIComponent(arg || store.get("country", "Netherlands")));
+    if (v === "country") showCountry(decodeURIComponent(arg || store.get("country", DEFAULT_COUNTRY)));
     if (v === "compare") renderCompare();
     if (v === "locations") { initMap(); setTimeout(() => map.invalidateSize(), 50); }
   }
@@ -64,7 +218,7 @@
     renderCountryList();
     const box = $("#country-content");
     let d;
-    try { d = await api("/api/countries/" + encodeURIComponent(name)); }
+    try { d = await getCountry(name); }
     catch (e) { box.innerHTML = `<p class="empty">Couldn't load ${esc(name)}: ${esc(e.message)}</p>`; return; }
     const N = store.get("n", 1000);
     const male = d.age_gender.filter((a) => a.gender === "Male"), female = d.age_gender.filter((a) => a.gender === "Female");
@@ -202,7 +356,7 @@
   // ------------------------------------------------------------------ compare view
   const SLOTS = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6"];
   const cache = {};
-  const detail = async (n) => (cache[n] ||= api("/api/countries/" + encodeURIComponent(n)));
+  const detail = async (n) => (cache[n] ||= getCountry(n));
   function slotColors() {
     // colour follows the country, not its position: keep a stable slot per country
     const list = store.get("compare", []), slots = store.get("slots", {});
@@ -280,9 +434,7 @@
     const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const lines = [["Metric", ...ds.flatMap((d) => [d.name + " %", d.name + " n"])].map(q).join(",")];
     cmpRows.forEach(([label, fn, isPct]) => lines.push([label, ...ds.flatMap((d) => { const v = fn(d); return isPct ? [v == null ? "" : (v * 100).toFixed(2), v == null ? "" : Math.round(v * N)] : [v, ""]; })].map(q).join(",")));
-    const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv" });
-    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `natrep_compare_${ds.map((d) => d.iso2).join("-")}.csv` });
-    a.click();
+    download(lines.join("\n"), `natrep_compare_${ds.map((d) => d.iso2).join("-")}.csv`);
   }
 
   // ------------------------------------------------------------------ locations view
@@ -317,31 +469,31 @@
     const c = state.center; if (!c || c.lat == null) return;
     const km = +$("#km").value;
     const country = $("#same-country").checked && c.country ? c.country : null;
-    $("#loc-summary").innerHTML = '<span class="muted">Searching…</span>';
+    $("#loc-summary").innerHTML = loading("Finding zip codes…");
     let d;
-    try { d = await api("/api/radius?" + qs({ lat: c.lat, lon: c.lon, km, country })); }
+    try { d = await radius(c.lat, c.lon, km, country); }
     catch (e) { $("#loc-summary").innerHTML = `<div class="note">${esc(e.message)}</div>`; return; }
     if (circle) circle.remove();
     circle = L.circle([c.lat, c.lon], { radius: km * 1000, color: css("--s1"), weight: 2, fillOpacity: 0.06 }).addTo(map);
     map.fitBounds(circle.getBounds(), { padding: [20, 20] });
-    const csvUrl = "/api/radius.csv?" + qs({ lat: c.lat, lon: c.lon, km, country, label: c.label.split(",")[0] });
-    showResults(d.results, `${int(d.count)} zip codes within ${km} km`, `of ${c.label}${country ? " · " + country + " only" : ""}${d.truncated ? " · list truncated" : ""}`, csvUrl, true);
+    const csvName = `zips_${safeName(c.label.split(",")[0], 40)}_${km}km.csv`;
+    showResults(d.results, `${int(d.count)} zip codes within ${km} km`, `of ${c.label}${country ? " · " + country + " only" : ""}${d.truncated ? " · list truncated" : ""}`, csvName, true);
   }
 
   async function loadArea({ country, level, value, within }) {
     initMap();
-    $("#loc-summary").innerHTML = '<span class="muted">Loading…</span>';
-    const d = await api("/api/area?" + qs({ country, level, value, within }));
+    $("#loc-summary").innerHTML = loading("Loading zip codes…");
+    const d = await area({ country, level, value, within });
     if (circle) { circle.remove(); circle = null; }
     if (centerMarker) { centerMarker.remove(); centerMarker = null; }
     state.center = null; $("#run-radius").disabled = true;
     $("#center-label").textContent = `${value}${within ? ", " + within : ""} (${country})`;
-    showResults(d.results, `${int(d.count)} zip codes`, `in ${value}${within ? ", " + within : ""}, ${country}`, "/api/area.csv?" + qs({ country, level, value, within }), false);
+    showResults(d.results, `${int(d.count)} zip codes`, `in ${value}${within ? ", " + within : ""}, ${country}`, `zips_${safeName(`${country}_${value}`, 50)}.csv`, false);
     const pts = d.results.filter((r) => r.lat != null).map((r) => [r.lat, r.lon]);
     if (pts.length) map.fitBounds(pts, { padding: [20, 20], maxZoom: 13 });
   }
 
-  function showResults(res, headline, sub, csvUrl, withDist) {
+  function showResults(res, headline, sub, csvName, withDist) {
     state.last = res;
     layer.clearLayers();
     const MAXM = 5000, color = css("--s2"), ring = css("--surface");
@@ -351,7 +503,8 @@
     $("#loc-summary").innerHTML = `<div><div class="count">${headline}</div><div class="small">${esc(sub)}${res.length > MAXM ? ` · map shows nearest ${int(MAXM)}` : ""}</div></div>
       <span style="flex:1"></span>
       <button class="btn ghost sm" id="copy-zips" ${res.length ? "" : "disabled"}>Copy zip list</button>
-      <a class="btn sm" href="${csvUrl}" ${res.length ? "" : 'style="pointer-events:none;opacity:.45"'}>Download CSV</a>`;
+      <a class="btn sm" href="#" id="csv-zips" ${res.length ? "" : 'style="pointer-events:none;opacity:.45"'}>Download CSV</a>`;
+    $("#csv-zips").addEventListener("click", (e) => { e.preventDefault(); zipsCsv(res, csvName); });
     $("#copy-zips").addEventListener("click", async () => {
       const txt = [...new Set(res.map((r) => r.zip))].join("\n");
       try { await navigator.clipboard.writeText(txt); toast(`Copied ${int(res.length)} zip codes`); } catch { toast("Copy failed – use Download CSV"); }
@@ -367,7 +520,10 @@
     const box = $("#loc-results");
     if (q.length < 2) { box.innerHTML = '<p class="hint">Type at least two characters.</p>'; return; }
     const seq = ++searchSeq;
-    const d = await api("/api/search?" + qs({ q, country, limit: 40 }));
+    box.innerHTML = loading("Searching…");
+    let d;
+    try { d = await search(q, country, 40); }
+    catch (e) { if (seq === searchSeq) box.innerHTML = `<p class="hint">Search failed: ${esc(e.message)}</p>`; return; }
     if (seq !== searchSeq) return;
     const zipHits = d.results.filter((r) => r.zip.replace(/\s/g, "").toLowerCase().startsWith(q.replace(/\s/g, "").toLowerCase()));
     let html = "";
@@ -390,14 +546,20 @@
 
   // ------------------------------------------------------------------ boot
   async function boot() {
-    [META, COUNTRIES] = await Promise.all([api("/api/meta"), api("/api/countries")]);
+    $("#meta").textContent = "Loading database…";
+    META = await getMeta();
+    COUNTRIES = await getCountries();
     $("#meta").innerHTML = `${int(META.countries)} countries · ${int(META.zip_rows)} zip records<br>Data: ${esc(META.source_file)} · loaded ${esc(META.built)}`;
     $("#loc-country").innerHTML += COUNTRIES.filter((c) => c.zip_records).map((c) => `<option>${esc(c.name)}</option>`).join("");
     $("#country-filter").addEventListener("input", renderCountryList);
     $("#compare-add").addEventListener("change", (e) => { if (!e.target.value) return; const l = store.get("compare", []); l.push(e.target.value); store.set("compare", l.slice(0, 6)); renderCompare(); });
     $("#compare-n").addEventListener("change", () => { store.set("n", +$("#compare-n").value || 1000); renderCompare(); });
     $("#compare-csv").addEventListener("click", downloadCompareCsv);
-    $("#loc-q").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(doSearch, 250); });
+    $("#loc-q").addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      if ($("#loc-q").value.trim().length >= 2) $("#loc-results").innerHTML = loading("Searching…");  // feedback during the debounce too
+      searchTimer = setTimeout(doSearch, 250);
+    });
     $("#loc-country").addEventListener("change", doSearch);
     const syncKm = (v) => { $("#km").value = v; $("#km-range").value = Math.min(100, v); };
     $("#km-range").addEventListener("input", (e) => syncKm(e.target.value));
@@ -413,7 +575,7 @@
     $("#theme-toggle").addEventListener("click", () => { const t = isDark() ? "light" : "dark"; document.documentElement.dataset.theme = t; store.set("theme", t); rerender(); });
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!store.get("theme", null)) rerender(); });
     paintToggle();
-    if (!location.hash) location.hash = "#/country";
+    if (!location.hash) location.hash = "#/country/" + encodeURIComponent(DEFAULT_COUNTRY);
     route();
   }
   boot().catch((e) => { document.body.insertAdjacentHTML("beforeend", `<div class="note" style="margin:20px">Couldn't start: ${esc(e.message)}</div>`); });
