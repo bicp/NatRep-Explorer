@@ -46,7 +46,9 @@ are picked up automatically as long as they follow the existing layout.
 
 ### Age splits (UN population data)
 
-The **Age splits** card (country page and Compare) offers six preset brackets: standard consumer, decade-based,
+The **Gender × age** and **Age splits** cards on the country page and the Compare age chart each have an age menu
+(Compare follows the Age splits card). It offers the workbook's own bands (the Gender × age default) and six preset
+brackets: standard consumer (the Age splits default), decade-based,
 younger skew, senior / healthcare and two B2B sets, plus **Custom bands**, where the viewer types the ages at which
 each band starts (e.g. `25, 35, 50, 65`: 18 always opens the first band and the last is open-ended). They are computed in the browser from adults by single year of
 age and sex in `data/un_wpp_age_sex.csv`. That file is extracted from the UN
