@@ -44,6 +44,24 @@ To rebuild without starting the server:
 The importer reads the **Home** tab to find each country's Nat Rep and ZIP tabs, so new countries added there
 are picked up automatically as long as they follow the existing layout.
 
+### Age splits (UN population data)
+
+The **Age splits** card (country page and Compare) offers six preset brackets: standard consumer, decade-based,
+younger skew, senior / healthcare and two B2B sets. They are computed in the browser from adults by single year of
+age and sex in `data/un_wpp_age_sex.csv`. That file is extracted from the UN
+[World Population Prospects 2024](https://population.un.org/wpp/) (medium variant, population on 1 July 2025),
+which is based on each country's censuses and surveys and covers all 65 countries in one consistent series.
+
+To refresh it (new UN revision every two years, or a later reference year), then rebuild the database:
+
+```bash
+.venv/bin/python scripts/fetch_un_ages.py            # downloads the UN file (~67 MB), keeps 2025
+.venv/bin/python scripts/fetch_un_ages.py "" 2026    # same, for another year
+```
+
+New countries need an entry in `ISO2` in `scripts/build_db.py`. The script stops if a country is missing from
+the UN data. The brackets themselves are defined in `AGE_SPLITS` at the top of `app/static/app.js`.
+
 ## Deploy to Cloudflare Pages
 
 `app/static/` is the whole site once the database is built – plain static files, no server code. The GitHub Actions

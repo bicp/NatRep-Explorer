@@ -9,6 +9,33 @@
   const int = (v) => (v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("en-GB"));
   const DEFAULT_COUNTRY = "Australia";  // opened when the site is visited without a page in the URL
   const AGES = ["18-24", "25-34", "35-44", "45-54", "55+"];
+  // Age splits, computed from single-year ages (UN World Population Prospects 2024, table age_single).
+  // bands: [from, to] inclusive, to = null means "and over"; an optional third item is the label.
+  const AGE_SPLITS = [
+    { id: "consumer", name: "Standard consumer (ESOMAR / census)", use: "General B2C surveys, brand tracking and studies requiring national census weighting.",
+      bands: [[18, 24], [25, 34], [35, 44], [45, 54], [55, 64], [65, null]] },
+    { id: "decade", name: "Decade-based", use: "Broad life-stage analysis (20s vs. 30s vs. 40s) when strict census alignment isn't needed.",
+      bands: [[18, 29], [30, 39], [40, 49], [50, 59], [60, 69], [70, null]] },
+    { id: "young", name: "Granular / younger skew", use: "Tech, social media, gaming and youth-focused products, where life changes rapidly between 25 and 34.",
+      bands: [[18, 24], [25, 29], [30, 34], [35, 44], [45, 54], [55, null]] },
+    { id: "senior", name: "Senior / healthcare", use: "Pharma, retirement planning and accessibility studies, where splitting 65+ reveals major differences in health and mobility.",
+      bands: [[18, 34], [35, 49], [50, 64], [65, 74], [75, 84], [85, null]] },
+    { id: "b2b", name: "B2B / professional", use: "Enterprise software and workplace studies, where career seniority matters more than exact age.",
+      bands: [[18, 24, "Under 25"], [25, 34], [35, 44], [45, 54], [55, null]] },
+    { id: "b2b-compact", name: "B2B / professional (compact)", use: "Enterprise software and workplace studies with fewer, broader seniority groups.",
+      bands: [[18, 24, "Under 25"], [25, 34], [35, 44], [45, null]] },
+  ];
+  const bandLabel = ([lo, hi, label]) => label || (hi == null ? `${lo}+` : `${lo}–${hi}`);
+  const currentSplit = () => AGE_SPLITS.find((s) => s.id === store.get("agesplit", "consumer")) || AGE_SPLITS[0];
+  // shares of all adults (male + female = 1) per band of a split
+  function splitShares(single, split) {
+    const tot = single.reduce((s, r) => s + r.male + r.female, 0) || 1;
+    return split.bands.map((b) => {
+      const [lo, hi] = b, inBand = single.filter((r) => r.age >= lo && (hi == null || r.age <= hi));
+      return { label: bandLabel(b), male: inBand.reduce((s, r) => s + r.male, 0) / tot, female: inBand.reduce((s, r) => s + r.female, 0) / tot };
+    });
+  }
+  const splitOptions = (sel) => AGE_SPLITS.map((s) => `<option value="${s.id}"${s.id === sel.id ? " selected" : ""}>${esc(s.name)}</option>`).join("");
   const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                   set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
   const loading = (msg) => `<p class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${esc(msg)}</p>`;
@@ -71,6 +98,7 @@
     c.warnings = JSON.parse(c.warnings || "[]");
     c.home_note = c.notes;
     c.age_gender = await rows("SELECT gender, age, share FROM age_gender WHERE country=? ORDER BY gender DESC, age", [name]);
+    c.age_single = await rows("SELECT age, male, female FROM age_single WHERE country=? ORDER BY age", [name]).catch(() => []);
     c.education = await rows("SELECT classification, level, share FROM education WHERE country=? ORDER BY ord", [name]);
     c.income = await rows("SELECT band, lower, upper, share, currency, year, definition, source, confidence, base FROM income WHERE country=? ORDER BY ord", [name]);
     c.notes = (await rows("SELECT text FROM notes WHERE country=? ORDER BY ord", [name])).map((r) => r.text);
@@ -253,6 +281,13 @@
           ${legend([["Male", css("--s1")], ["Female", css("--s2")]])}
           <div class="chart"><canvas id="c-age"></canvas></div>
           <div id="t-age"></div></div>
+        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-3M11 16V8M15 16v-6M19 16V5"/></svg>Age splits</h2><small>adults 18+</small></div>
+          <div class="split-pick"><select id="age-split" aria-label="Age split">${splitOptions(currentSplit())}</select><button class="btn ghost" id="split-csv">Download CSV</button></div>
+          <p class="small" id="split-use"></p>
+          ${legend([["Male", css("--s1")], ["Female", css("--s2")]])}
+          <div class="chart"><canvas id="c-split"></canvas></div>
+          <div id="t-split"></div>
+          <p class="small muted">Source: ${esc(META.age_source || "UN World Population Prospects 2024")}.</p></div>
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education</h2></div><div id="edu"></div></div>
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>Household income (local)</h2></div><div id="inc"></div></div>
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2><small>HHI Comparable tab</small></div><div id="hhi"></div></div>
@@ -262,6 +297,8 @@
       </div>`;
 
     $("#sample-n").addEventListener("input", () => { store.set("n", sampleN()); fillCountryTables(d); });
+    $("#age-split").addEventListener("change", (e) => { store.set("agesplit", e.target.value); renderSplit(d); });
+    $("#split-csv").addEventListener("click", () => splitCsv(d));
     $("#add-compare").addEventListener("click", () => { const l = store.get("compare", []); if (!l.includes(d.name)) { l.push(d.name); store.set("compare", l.slice(-6)); } });
 
     chart("c-age", { type: "bar", data: { labels: AGES, datasets: [
@@ -294,8 +331,36 @@
 
   function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
 
+  function renderSplit(d) {
+    const split = currentSplit(), N = sampleN();
+    $("#split-use").textContent = "Best used for: " + split.use;
+    if (!d.age_single.length) { $("#t-split").innerHTML = '<p class="muted">No single-year age data in this database – rebuild it with scripts/build_db.py.</p>'; return; }
+    const sh = splitShares(d.age_single, split);
+    chart("c-split", { type: "bar", data: { labels: sh.map((r) => r.label), datasets: [
+      { label: "Male", data: sh.map((r) => r.male * 100), ...bar(css("--s1")) },
+      { label: "Female", data: sh.map((r) => r.female * 100), ...bar(css("--s2")) }] },
+      options: { scales: { x: { grid: { display: false } }, ...pctAxis() }, plugins: { legend: { display: false }, tooltip: pctTip } } });
+    let tm = 0, tf = 0;
+    const row = (label, x, y, cls = "") => `<tr class="${cls}"><td>${esc(label)}</td><td class="num">${pct(x, 2)}</td><td class="num">${int(x * N)}</td><td class="num">${pct(y, 2)}</td><td class="num">${int(y * N)}</td><td class="num">${pct(x + y, 2)}</td><td class="num">${int((x + y) * N)}</td></tr>`;
+    $("#t-split").innerHTML = `<table><thead><tr><th>Age</th><th class="num">Male %</th><th class="num">Male n</th><th class="num">Female %</th><th class="num">Female n</th><th class="num">Total %</th><th class="num">Total n</th></tr></thead><tbody>
+      ${sh.map((r) => { tm += r.male; tf += r.female; return row(r.label, r.male, r.female); }).join("")}
+      ${row("Total", tm, tf, "total")}</tbody></table>`;
+  }
+
+  function splitCsv(d) {
+    const split = currentSplit(), N = sampleN();
+    if (!d.age_single.length) return;
+    const lines = [["Country", "Age split", "Age", "Male %", "Male n", "Female %", "Female n", "Total %", "Total n"]];
+    for (const r of splitShares(d.age_single, split))
+      lines.push([d.name, split.name, r.label, (r.male * 100).toFixed(2), Math.round(r.male * N), (r.female * 100).toFixed(2), Math.round(r.female * N), ((r.male + r.female) * 100).toFixed(2), Math.round((r.male + r.female) * N)]);
+    lines.push([], [`Source: ${META.age_source || "UN World Population Prospects 2024"}`], [`Sample size: ${N}`]);
+    const cell = (v) => { v = String(v ?? ""); return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+    download(lines.map((l) => l.map(cell).join(",")).join("\r\n") + "\r\n", `natrep_age_${d.iso2 || safeName(d.name, 20)}_${split.id}.csv`);
+  }
+
   function fillCountryTables(d) {
     const N = sampleN();
+    renderSplit(d);
     // gender × age table
     const m = (g, a) => d.age_gender.find((x) => x.gender === g && x.age === a)?.share || 0;
     let tm = 0, tf = 0;
@@ -388,21 +453,25 @@
     const ds = await Promise.all(list.map(detail));
     const N = Math.max(1, +$("#compare-n").value || 1000);
     const lg = legend(list.map((n) => [n, colors[n]]));
+    const split = currentSplit();
     body.innerHTML = `
       <div class="grid">
-        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Age distribution (adults 18+)</h2>${lg}<div class="chart"><canvas id="k-age"></canvas></div></div>
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Age distribution (adults 18+)</h2><div class="split-pick"><select id="k-split" aria-label="Age split">${splitOptions(split)}</select></div>${lg}<div class="chart"><canvas id="k-age"></canvas></div><p class="small muted">${esc(split.name)} · ${esc(META.age_source || "UN World Population Prospects 2024")}</p></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education (ISCED, adults 25–64)</h2>${lg}<div class="chart"><canvas id="k-edu"></canvas></div></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2>${lg}<div class="chart"><canvas id="k-hhi"></canvas></div></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16.1a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 20 0"/><circle cx="12" cy="20" r="1"/></svg>Internet penetration</h2><div class="chart"><canvas id="k-int"></canvas></div></div>
         <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 6h18M3 18h18"/></svg>Side by side</h2><small>% (n at sample size ${int(N)})</small></div><div class="table-wrap" id="k-table"></div></div>
         <div class="card full"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>Local household income bands</h2><div class="grid" id="k-inc"></div></div>
       </div>`;
-    const ageShare = (d, a) => d.age_gender.filter((x) => x.age === a).reduce((s, x) => s + (x.share || 0), 0);
+    $("#k-split").addEventListener("change", (e) => { store.set("agesplit", e.target.value); renderCompare(); });
+    const AGE_LABELS = split.bands.map(bandLabel);
+    const splitOf = new Map(ds.map((d) => [d.name, d.age_single.length ? splitShares(d.age_single, split) : null]));
+    const ageShare = (d, a) => { const r = splitOf.get(d.name)?.find((x) => x.label === a); return r ? r.male + r.female : null; };
     const edu = (d, k) => { const r = d.education.filter((e) => /^ISCED/.test(e.classification) && eduKey(e.level) === k); return r.length && r.some((x) => x.share != null) ? r.reduce((s, x) => s + (x.share || 0), 0) : null; };
     const hhiBands = (META.hhi_columns || []).filter((c) => c.endsWith(" %"));
     const grouped = (labels, fn) => ({ labels, datasets: ds.map((d) => ({ label: d.name, data: labels.map((l) => { const v = fn(d, l); return v == null ? null : v * 100; }), ...bar(colors[d.name]) })) });
     const opts = { scales: { x: { grid: { display: false } }, ...pctAxis() }, plugins: { legend: { display: false }, tooltip: pctTip } };
-    chart("k-age", { type: "bar", data: grouped(AGES, ageShare), options: opts });
+    chart("k-age", { type: "bar", data: grouped(AGE_LABELS, ageShare), options: opts });
     chart("k-edu", { type: "bar", data: grouped(EDU, edu), options: opts });
     chart("k-hhi", { type: "bar", data: grouped(hhiBands.map((b) => b.replace(" %", "")), (d, l) => d.hhi ? +d.hhi[l + " %"] : null), options: opts });
     chart("k-int", { type: "bar", data: { labels: ds.map((d) => d.name), datasets: [{ data: ds.map((d) => d.internet * 100), backgroundColor: ds.map((d) => colors[d.name]), borderRadius: 4, maxBarThickness: 28 }] },
@@ -413,7 +482,7 @@
     cmpRows = [
       ["Internet penetration", (d) => d.internet, true],
       ["Male", male, true], ["Female", (d) => 1 - male(d), true],
-      ...AGES.map((a) => ["Age " + a, (d) => ageShare(d, a), true]),
+      ...AGE_LABELS.map((a) => ["Age " + a, (d) => ageShare(d, a), true]),
       ...EDU.map((k) => ["Education: " + k, (d) => edu(d, k), true]),
       ...hhiBands.map((b) => ["HHI " + b.replace(" %", ""), (d) => (d.hhi ? +d.hhi[b] : null), true]),
       ["Median HH income (EUR est.)", (d) => (d.hhi ? +d.hhi["Median EUR Est"] : null), false, (v) => "€" + int(v)],

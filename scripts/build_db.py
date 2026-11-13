@@ -5,7 +5,7 @@ Usage:  python scripts/build_db.py path/to/Global_Nat_Rep_and_Zip_Codes_Combined
 Re-run whenever the workbook is updated; the database is rebuilt from scratch and split into chunks in
 app/static/db/ (plus config.json), which the browser reads with HTTP range requests.
 """
-import json, math, os, re, sqlite3, sys, time
+import csv, json, math, os, re, sqlite3, sys, time
 import openpyxl
 
 XLSX = sys.argv[1] if len(sys.argv) > 1 else "Global_Nat_Rep_and_Zip_Codes_Combined.xlsx"
@@ -24,6 +24,8 @@ ISO2 = {
  "Taiwan":"TW","Thailand":"TH","Turkey":"TR","United Kingdom":"GB","United States":"US","Uruguay":"UY","Vietnam":"VN",
 }
 AGE_BANDS = ["18-24", "25-34", "35-44", "45-54", "55+"]
+# adults by single year of age and sex (UN World Population Prospects), written by scripts/fetch_un_ages.py
+UN_AGES = os.path.join(os.path.dirname(__file__), "..", "data", "un_wpp_age_sex.csv")
 
 
 def s(v):
@@ -184,6 +186,7 @@ def main():
         layout TEXT, region_tab TEXT, notes TEXT, internet REAL, internet_src TEXT, target REAL, has_coords INT DEFAULT 0,
         warnings TEXT);
     CREATE TABLE age_gender(country TEXT, gender TEXT, age TEXT, share REAL);
+    CREATE TABLE age_single(country TEXT, age INT, male REAL, female REAL);  -- thousands; age 100 = 100+
     CREATE TABLE education(country TEXT, classification TEXT, level TEXT, share REAL, ord INT);
     CREATE TABLE income(country TEXT, ord INT, band TEXT, lower REAL, upper REAL, share REAL, currency TEXT, year TEXT,
         definition TEXT, source TEXT, confidence TEXT, base TEXT);
@@ -224,6 +227,17 @@ def main():
                 ex.append((c["name"], len(ex), c["region_tab"], b["title"], json.dumps(b["rows"], default=str)))
         con.executemany("INSERT INTO extras VALUES(?,?,?,?,?)", ex)
         if d["warnings"]: print("  !", c["name"], d["warnings"])
+
+    # single-year ages for the age splits
+    if os.path.exists(UN_AGES):
+        with open(UN_AGES, encoding="utf-8") as fh:
+            ua = [(r["country"], int(r["age"]), float(r["male_thousands"]), float(r["female_thousands"])) for r in csv.DictReader(fh)]
+        con.executemany("INSERT INTO age_single VALUES(?,?,?,?)", ua)
+        con.execute("CREATE INDEX age_single_country ON age_single(country, age)")
+        con.execute("INSERT INTO meta VALUES('age_source', 'UN World Population Prospects 2024, medium variant, population on 1 July 2025')")
+        print(f"  UN single-year ages: {len({r[0] for r in ua})} countries")
+    else:
+        print("  ! no", UN_AGES, "– run scripts/fetch_un_ages.py; age splits will be empty")
 
     # reference tables
     hdr, rows = table_rows(wb["HHI Comparable"], 1)

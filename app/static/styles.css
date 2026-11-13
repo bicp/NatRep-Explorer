@@ -262,3 +262,8 @@ td.num { font-size: 12.5px; }
 .theme-toggle { margin-left: 12px; width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--border); background: var(--field); color: var(--text-2); display: grid; place-items: center; cursor: pointer; flex: none; }
 .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
 .meta { margin-left: auto; }
+
+/* age split picker */
+.split-pick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.split-pick select { flex: 1; min-width: 0; max-width: 340px; }
+.card > h2 + .split-pick { margin-bottom: 8px; }
