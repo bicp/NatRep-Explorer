@@ -26,7 +26,17 @@
       bands: [[18, 24, "Under 25"], [25, 34], [35, 44], [45, null]] },
   ];
   const bandLabel = ([lo, hi, label]) => label || (hi == null ? `${lo}+` : `${lo}–${hi}`);
-  const currentSplit = () => AGE_SPLITS.find((s) => s.id === store.get("agesplit", "consumer")) || AGE_SPLITS[0];
+  // Custom bands: the viewer types the ages where each band starts ("25, 35, 50, 65"); 18 always opens the first band
+  // and the last band is open-ended (65+). Ages above 100 are dropped, since the UN data stops at 100+.
+  const DEFAULT_CUTS = "25, 35, 45, 55, 65";
+  const parseCuts = (text) => [...new Set(String(text).split(/[^0-9]+/).filter(Boolean).map(Number).filter((n) => n > 18 && n <= 100))].sort((a, b) => a - b);
+  const customSplit = () => {
+    const starts = [18, ...parseCuts(store.get("agecuts", DEFAULT_CUTS))];
+    return { id: "custom", name: "Custom bands", use: "Your own bands – type the ages where each new band starts, e.g. 25, 35, 50, 65.",
+             bands: starts.map((a, i) => [a, i + 1 < starts.length ? starts[i + 1] - 1 : null]) };
+  };
+  const currentSplit = () => { const id = store.get("agesplit", "consumer");
+    return id === "custom" ? customSplit() : AGE_SPLITS.find((s) => s.id === id) || AGE_SPLITS[0]; };
   // shares of all adults (male + female = 1) per band of a split
   function splitShares(single, split) {
     const tot = single.reduce((s, r) => s + r.male + r.female, 0) || 1;
@@ -35,7 +45,31 @@
       return { label: bandLabel(b), male: inBand.reduce((s, r) => s + r.male, 0) / tot, female: inBand.reduce((s, r) => s + r.female, 0) / tot };
     });
   }
-  const splitOptions = (sel) => AGE_SPLITS.map((s) => `<option value="${s.id}"${s.id === sel.id ? " selected" : ""}>${esc(s.name)}</option>`).join("");
+  const splitOptions = (sel) => [...AGE_SPLITS, { id: "custom", name: "Custom bands…" }]
+    .map((s) => `<option value="${s.id}"${s.id === sel.id ? " selected" : ""}>${esc(s.name)}</option>`).join("");
+  const cutsInput = (id, sel) => `<input id="${id}" class="cuts" type="text" inputmode="numeric" value="${esc(store.get("agecuts", DEFAULT_CUTS))}"
+    placeholder="e.g. 25, 35, 50, 65" aria-label="Ages where each custom band starts" title="Ages where each new band starts – 18 is always the first band, the last one is open-ended"${sel.id === "custom" ? "" : " hidden"}>`;
+  // wire a split <select> + custom-cuts <input> pair; rerender() redraws whatever depends on the split
+  function wireSplit(selId, cutsId, rerender) {
+    const sel = $("#" + selId), cuts = $("#" + cutsId);
+    // rerender may rebuild the input (Compare redraws its whole panel): keep the cursor in it while typing
+    const redo = async () => {
+      const typing = document.activeElement === cuts, pos = cuts.selectionStart;
+      await rerender();
+      const now = $("#" + cutsId);
+      if (typing && now && now !== cuts) { now.focus(); now.setSelectionRange(pos, pos); }
+    };
+    sel.addEventListener("change", async () => { store.set("agesplit", sel.value); cuts.hidden = sel.value !== "custom"; await rerender(); if (sel.value === "custom") $("#" + cutsId)?.focus(); });
+    let t;
+    cuts.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { store.set("agecuts", cuts.value); redo(); }, 500); });
+    // on blur: tidy the text; redraw only if the bands changed (the browser also fires this when a redraw removes the box)
+    cuts.addEventListener("change", () => {
+      clearTimeout(t);
+      const v = parseCuts(cuts.value).join(", "), same = v === parseCuts(store.get("agecuts", DEFAULT_CUTS)).join(", ");
+      cuts.value = v; store.set("agecuts", v);
+      if (!same) redo();
+    });
+  }
   const store = { get(k, d) { try { const v = localStorage.getItem("natrep:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                   set(k, v) { try { localStorage.setItem("natrep:" + k, JSON.stringify(v)); } catch {} } };
   const loading = (msg) => `<p class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${esc(msg)}</p>`;
@@ -282,7 +316,7 @@
           <div class="chart"><canvas id="c-age"></canvas></div>
           <div id="t-age"></div></div>
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-3M11 16V8M15 16v-6M19 16V5"/></svg>Age splits</h2><small>adults 18+</small></div>
-          <div class="split-pick"><select id="age-split" aria-label="Age split">${splitOptions(currentSplit())}</select><button class="btn ghost" id="split-csv">Download CSV</button></div>
+          <div class="split-pick"><select id="age-split" aria-label="Age split">${splitOptions(currentSplit())}</select>${cutsInput("age-cuts", currentSplit())}<button class="btn ghost" id="split-csv">Download CSV</button></div>
           <p class="small" id="split-use"></p>
           ${legend([["Male", css("--s1")], ["Female", css("--s2")]])}
           <div class="chart"><canvas id="c-split"></canvas></div>
@@ -297,7 +331,7 @@
       </div>`;
 
     $("#sample-n").addEventListener("input", () => { store.set("n", sampleN()); fillCountryTables(d); });
-    $("#age-split").addEventListener("change", (e) => { store.set("agesplit", e.target.value); renderSplit(d); });
+    wireSplit("age-split", "age-cuts", () => renderSplit(d));
     $("#split-csv").addEventListener("click", () => splitCsv(d));
     $("#add-compare").addEventListener("click", () => { const l = store.get("compare", []); if (!l.includes(d.name)) { l.push(d.name); store.set("compare", l.slice(-6)); } });
 
@@ -456,14 +490,14 @@
     const split = currentSplit();
     body.innerHTML = `
       <div class="grid">
-        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Age distribution (adults 18+)</h2><div class="split-pick"><select id="k-split" aria-label="Age split">${splitOptions(split)}</select></div>${lg}<div class="chart"><canvas id="k-age"></canvas></div><p class="small muted">${esc(split.name)} · ${esc(META.age_source || "UN World Population Prospects 2024")}</p></div>
+        <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M8 17V9M13 17V5M18 17v-6"/></svg>Age distribution (adults 18+)</h2><div class="split-pick"><select id="k-split" aria-label="Age split">${splitOptions(split)}</select>${cutsInput("k-cuts", split)}</div>${lg}<div class="chart"><canvas id="k-age"></canvas></div><p class="small muted">${esc(split.name)} · ${esc(META.age_source || "UN World Population Prospects 2024")}</p></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education (ISCED, adults 25–64)</h2>${lg}<div class="chart"><canvas id="k-edu"></canvas></div></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2>${lg}<div class="chart"><canvas id="k-hhi"></canvas></div></div>
         <div class="card"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16.1a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 20 0"/><circle cx="12" cy="20" r="1"/></svg>Internet penetration</h2><div class="chart"><canvas id="k-int"></canvas></div></div>
         <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 6h18M3 18h18"/></svg>Side by side</h2><small>% (n at sample size ${int(N)})</small></div><div class="table-wrap" id="k-table"></div></div>
         <div class="card full"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>Local household income bands</h2><div class="grid" id="k-inc"></div></div>
       </div>`;
-    $("#k-split").addEventListener("change", (e) => { store.set("agesplit", e.target.value); renderCompare(); });
+    wireSplit("k-split", "k-cuts", renderCompare);
     const AGE_LABELS = split.bands.map(bandLabel);
     const splitOf = new Map(ds.map((d) => [d.name, d.age_single.length ? splitShares(d.age_single, split) : null]));
     const ageShare = (d, a) => { const r = splitOf.get(d.name)?.find((x) => x.label === a); return r ? r.male + r.female : null; };

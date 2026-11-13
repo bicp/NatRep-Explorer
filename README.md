@@ -47,7 +47,8 @@ are picked up automatically as long as they follow the existing layout.
 ### Age splits (UN population data)
 
 The **Age splits** card (country page and Compare) offers six preset brackets: standard consumer, decade-based,
-younger skew, senior / healthcare and two B2B sets. They are computed in the browser from adults by single year of
+younger skew, senior / healthcare and two B2B sets, plus **Custom bands**, where the viewer types the ages at which
+each band starts (e.g. `25, 35, 50, 65`: 18 always opens the first band and the last is open-ended). They are computed in the browser from adults by single year of
 age and sex in `data/un_wpp_age_sex.csv`. That file is extracted from the UN
 [World Population Prospects 2024](https://population.un.org/wpp/) (medium variant, population on 1 July 2025),
 which is based on each country's censuses and surveys and covers all 65 countries in one consistent series.
