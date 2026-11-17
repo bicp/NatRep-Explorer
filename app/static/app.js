@@ -43,7 +43,8 @@
     use: "The gender × age bands from the Nat Rep workbook.", bands: [[18, 24], [25, 34], [35, 44], [45, 54], [55, null]] };
   const currentSplit = (ctx) => { const id = store.get(ctx.key, ctx.def);
     return id === "custom" ? customSplit(ctx) : [WORKBOOK_SPLIT, ...AGE_SPLITS].find((s) => s.id === id) || WORKBOOK_SPLIT; };
-  const splitSource = (split) => split.workbook ? "Nat Rep workbook" : META.age_source || "UN World Population Prospects 2024";
+  // the UK and its nations use ONS single-year ages (countries.age_source); everyone else the UN's
+  const splitSource = (split, d) => split.workbook ? "Nat Rep workbook" : d?.age_source || META.age_source || "UN World Population Prospects 2024";
   // [{label, male, female}] for a country's detail record, shares of all adults; null when the data isn't there
   function ageRows(d, split) {
     if (split.workbook) {
@@ -320,7 +321,7 @@
       ${d.warnings.length ? `<div class="note">Data check: ${esc(d.warnings.join("; "))}</div>` : ""}
       <div class="kpis">
         <div class="kpi"><div class="label">Internet penetration</div><div class="value">${pct(d.internet)}</div><div class="foot">${esc(d.internet_src || "")}</div></div>
-        <div class="kpi"><div class="label">Male / Female (18+)</div><div class="value">${pct(mShare)} / ${pct(1 - mShare)}</div><div class="foot">UN WPP 2024</div></div>
+        <div class="kpi"><div class="label">Male / Female (18+)</div><div class="value">${pct(mShare)} / ${pct(1 - mShare)}</div><div class="foot">${d.age_source ? "ONS mid-2024" : "UN WPP 2024"}</div></div>
         <div class="kpi"><div class="label">Aged 55+</div><div class="value">${pct(male.concat(female).filter((a) => a.age === "55+").reduce((s, a) => s + a.share, 0))}</div><div class="foot">share of adults</div></div>
         <div class="kpi"><div class="label">Tertiary educated</div><div class="value">${pct(tert?.share)}</div><div class="foot">ISCED, adults 25–64</div></div>
         <div class="kpi"><div class="label">Median HH income (EUR est.)</div><div class="value">${d.hhi?.["Median EUR Est"] ? "€" + int(+d.hhi["Median EUR Est"]) : "–"}</div><div class="foot">${d.hhi?.Confidence ? "Confidence: " + esc(d.hhi.Confidence) : "HHI Comparable"}</div></div>
@@ -382,7 +383,7 @@
   function renderSplit(d, c) {
     const split = currentSplit(c.ctx), N = sampleN();
     $("#" + c.use).textContent = (split.workbook || split.id === "custom" ? "" : "Best used for: ") + split.use;
-    $("#" + c.src).textContent = `Source: ${splitSource(split)}.`;
+    $("#" + c.src).textContent = `Source: ${splitSource(split, d)}.`;
     const sh = ageRows(d, split);
     if (!sh) { chart(c.chart, null); $("#" + c.table).innerHTML = '<p class="muted">No age data for these bands in this database – rebuild it with scripts/build_db.py.</p>'; return; }
     chart(c.chart, { type: "bar", data: { labels: sh.map((r) => r.label), datasets: [
@@ -403,7 +404,7 @@
     const lines = [["Country", "Age bands", "Age", "Male %", "Male n", "Female %", "Female n", "Total %", "Total n"]];
     for (const r of sh)
       lines.push([d.name, split.name, r.label, (r.male * 100).toFixed(2), Math.round(r.male * N), (r.female * 100).toFixed(2), Math.round(r.female * N), ((r.male + r.female) * 100).toFixed(2), Math.round((r.male + r.female) * N)]);
-    lines.push([], [`Source: ${splitSource(split)}`], [`Sample size: ${N}`]);
+    lines.push([], [`Source: ${splitSource(split, d)}`], [`Sample size: ${N}`]);
     const cell = (v) => { v = String(v ?? ""); return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
     download(lines.map((l) => l.map(cell).join(",")).join("\r\n") + "\r\n", `natrep_age_${d.iso2 || safeName(d.name, 20)}_${split.id}.csv`);
   }

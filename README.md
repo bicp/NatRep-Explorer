@@ -65,6 +65,22 @@ To refresh it (new UN revision every two years, or a later reference year), then
 New countries need an entry in `ISO2` in `scripts/build_db.py`. The script stops if a country is missing from
 the UN data. The brackets themselves are defined in `AGE_SPLITS` at the top of `app/static/app.js`.
 
+### UK nations
+
+The **GB** tab holds a section per nation below the UK one (England, Scotland, Wales, Northern Ireland), each with
+the same layout: a title in column B followed by *Internet penetration* and *Target* rows. The importer turns each
+section into its own entry, *United Kingdom – England* etc. (codes GB-ENG, GB-SCT, GB-WLS, GB-NIR); the nations
+have no zip tab of their own. Their figures come from ONS mid-2024 population estimates (gender and age), Ofcom
+Technology Tracker 2026 (internet), OECD 2024 (education; England is the population-weighted mean of its 9
+regions) and DWP Households Below Average Income FYE 2025 (share of individuals in each UK income quintile).
+
+For the UK and the nations the age splits use the ONS single-year ages in `data/ons_uk_age_sex.csv` instead of the
+UN data. To refresh them after the next ONS release, update `URL` in the script, run it, then rebuild the database:
+
+```bash
+.venv/bin/python scripts/fetch_ons_uk_ages.py
+```
+
 ## Deploy to Cloudflare Pages
 
 `app/static/` is the whole site once the database is built – plain static files, no server code. The GitHub Actions

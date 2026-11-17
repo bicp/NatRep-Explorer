@@ -23,9 +23,16 @@ ISO2 = {
  "Slovakia":"SK","Slovenia":"SI","South Africa":"ZA","South Korea":"KR","Spain":"ES","Sweden":"SE","Switzerland":"CH",
  "Taiwan":"TW","Thailand":"TH","Turkey":"TR","United Kingdom":"GB","United States":"US","Uruguay":"UY","Vietnam":"VN",
 }
+# Some Nat Rep tabs hold extra sections for parts of the country below the national one (the GB tab: England,
+# Scotland, Wales, Northern Ireland). Each becomes its own entry, "<country> – <section>", with these codes.
+SUB_ISO2 = {"England": "GB-ENG", "Scotland": "GB-SCT", "Wales": "GB-WLS", "Northern Ireland": "GB-NIR"}
 AGE_BANDS = ["18-24", "25-34", "35-44", "45-54", "55+"]
 # adults by single year of age and sex (UN World Population Prospects), written by scripts/fetch_un_ages.py
 UN_AGES = os.path.join(os.path.dirname(__file__), "..", "data", "un_wpp_age_sex.csv")
+# the same for the UK and its nations from the ONS mid-year estimates, written by scripts/fetch_ons_uk_ages.py;
+# replaces the UN figures for the countries it covers
+ONS_AGES = os.path.join(os.path.dirname(__file__), "..", "data", "ons_uk_age_sex.csv")
+ONS_AGE_SOURCE = "ONS mid-year population estimates, mid-2024 (table MYE2)"
 
 
 def s(v):
@@ -88,8 +95,17 @@ def blocks(g, r0, r1):
     return res
 
 
-def parse_natrep(name, ws):
-    g = grid(ws)
+def sections(g):
+    """[(title, first_row, end_row)] of a Nat Rep tab: a title in column B with "Internet penetration" and "Target"
+    right below. The first section is the country itself; any further ones are parts of it (e.g. the UK nations)."""
+    starts = [(s(g[i][1]), i) for i in range(len(g) - 2)
+              if s(g[i][1]) and s(g[i + 1][1]).lower() == "internet penetration" and s(g[i + 2][1]).lower() == "target"]
+    if not starts: return [(None, 0, len(g))]
+    starts[0] = (None, 0)
+    return [(t, i, starts[k + 1][1] if k + 1 < len(starts) else len(g)) for k, (t, i) in enumerate(starts)]
+
+
+def parse_natrep(name, g):
     d = {"internet": None, "internet_src": None, "target": None, "age_gender": [], "education": [], "income": [],
          "notes": [], "extras": [], "warnings": []}
     p = find(g, lambda v: v.lower() == "internet penetration")
@@ -184,7 +200,7 @@ def main():
     PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF;
     CREATE TABLE countries(name TEXT PRIMARY KEY, iso2 TEXT, natrep_sheet TEXT, zip_sheet TEXT, zip_records INT,
         layout TEXT, region_tab TEXT, notes TEXT, internet REAL, internet_src TEXT, target REAL, has_coords INT DEFAULT 0,
-        warnings TEXT);
+        warnings TEXT, age_source TEXT);
     CREATE TABLE age_gender(country TEXT, gender TEXT, age TEXT, share REAL);
     CREATE TABLE age_single(country TEXT, age INT, male REAL, female REAL);  -- thousands; age 100 = 100+
     CREATE TABLE education(country TEXT, classification TEXT, level TEXT, share REAL, ord INT);
@@ -211,11 +227,20 @@ def main():
         countries.append(dict(name=s(r[0]), sheet=s(r[1]), zip_sheet=s(r[2]) if s(r[2]) in wb.sheetnames else None,
                               zip_records=num(r[3]), layout=s(r[4]), region_tab=s(r[6]), notes=s(r[7])))
 
+    entries = []  # countries plus their sub-national sections
     for c in countries:
-        d = parse_natrep(c["name"], wb[c["sheet"]])
-        iso = ISO2.get(c["name"])
-        con.execute("INSERT INTO countries VALUES(?,?,?,?,?,?,?,?,?,?,?,0,?)",
-                    (c["name"], iso, c["sheet"], c["zip_sheet"], c["zip_records"], c["layout"], c["region_tab"], c["notes"],
+        g = grid(wb[c["sheet"]])
+        for title, r0, r1 in sections(g):
+            if title is None:
+                entries.append((dict(c, iso=ISO2.get(c["name"])), g[r0:r1])); continue
+            print(f"  {c['name']}: section {title}")
+            entries.append((dict(c, name=f"{c['name']} – {title}", iso=SUB_ISO2.get(title), zip_sheet=None, zip_records=None,
+                                 region_tab=None, notes=f"Part of {c['name']}; its zip codes are listed under {c['name']}."),
+                            g[r0:r1]))
+    for c, g in entries:
+        d = parse_natrep(c["name"], g)
+        con.execute("INSERT INTO countries VALUES(?,?,?,?,?,?,?,?,?,?,?,0,?,NULL)",
+                    (c["name"], c["iso"], c["sheet"], c["zip_sheet"], c["zip_records"], c["layout"], c["region_tab"], c["notes"],
                      d["internet"], d["internet_src"], d["target"], json.dumps(d["warnings"])))
         con.executemany("INSERT INTO age_gender VALUES(?,?,?,?)", [(c["name"], x["gender"], x["age"], x["share"]) for x in d["age_gender"]])
         con.executemany("INSERT INTO education VALUES(?,?,?,?,?)", [(c["name"], x["classification"], x["level"], x["share"], i) for i, x in enumerate(d["education"])])
@@ -238,6 +263,16 @@ def main():
         print(f"  UN single-year ages: {len({r[0] for r in ua})} countries")
     else:
         print("  ! no", UN_AGES, "– run scripts/fetch_un_ages.py; age splits will be empty")
+    if os.path.exists(ONS_AGES):
+        with open(ONS_AGES, encoding="utf-8") as fh:
+            oa = [(r["country"], int(r["age"]), float(r["male_thousands"]), float(r["female_thousands"])) for r in csv.DictReader(fh)]
+        names = sorted({r[0] for r in oa})
+        unknown = [n for n in names if n not in {c["name"] for c, _ in entries}]
+        if unknown: sys.exit(f"{ONS_AGES}: not in the workbook: {', '.join(unknown)}")
+        con.executemany("DELETE FROM age_single WHERE country=?", [(n,) for n in names])
+        con.executemany("INSERT INTO age_single VALUES(?,?,?,?)", oa)
+        con.executemany("UPDATE countries SET age_source=? WHERE name=?", [(ONS_AGE_SOURCE, n) for n in names])
+        print(f"  ONS single-year ages: {', '.join(names)}")
 
     # reference tables
     hdr, rows = table_rows(wb["HHI Comparable"], 1)
@@ -286,7 +321,7 @@ def main():
     finalize(con)
     con.close()
     export_for_web(DB, WEB_DIR)
-    print(f"done: {total:,} zip rows, {len(countries)} countries, {round(time.time() - t0)}s, {os.path.getsize(DB) / 1e6:.0f} MB")
+    print(f"done: {total:,} zip rows, {len(countries)} countries + {len(entries) - len(countries)} sections, {round(time.time() - t0)}s, {os.path.getsize(DB) / 1e6:.0f} MB")
 
 
 # The browser reads the database over HTTP, a few pages at a time, so every query must hit an index or a small
