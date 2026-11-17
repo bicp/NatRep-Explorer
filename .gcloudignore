@@ -1,0 +1,8 @@
+# Files uploaded to Cloud Build by `gcloud run deploy --source .`
+# Unlike .gitignore, the workbook in data/ IS uploaded: the Docker build needs it.
+.git
+.gitignore
+.gcloudignore
+__pycache__/
+data/*.db
+data/*.db-*
