@@ -142,10 +142,16 @@ def parse_natrep(name, g):
                 d["notes"].append(lab)
             k += 1
         i += 1
-    # income
-    p = find(g, lambda v: v == "Income Definition")
-    if p:
-        hi = p[0]; hdr = {s(v): k for k, v in enumerate(g[hi]) if s(v)}
+    # income: every table with an "Income Definition" header (a tab can hold several side by side, e.g. the GB tab's
+    # DWP HBAI quintiles and FRS household gross income bands); each becomes its own table number (tbl)
+    heads = [(i, j) for i in range(len(g)) for j, v in enumerate(g[i]) if s(v) == "Income Definition"]
+    if not heads: d["warnings"].append("income table not found")
+    for tbl, (hi, j) in enumerate(heads):
+        c0 = j
+        while c0 > 0 and s(g[hi][c0 - 1]): c0 -= 1
+        c1 = j
+        while c1 + 1 < len(g[hi]) and s(g[hi][c1 + 1]): c1 += 1
+        hdr = {s(g[hi][k]): k for k in range(c0, c1 + 1)}  # only this table's own header cells
         bcol = hdr.get("Income Band Local", hdr.get("Band"))
         pcol = hdr.get("% Households", hdr.get("% Population"))
         country = year = cur = defin = None
@@ -160,10 +166,8 @@ def parse_natrep(name, g):
                 band = f"{band} ({rng} {cur})" if rng else band
             d["income"].append({"band": band, "lower": lo, "upper": up, "share": num(r[pcol]) if pcol is not None else None,
                                 "currency": cur, "year": year, "definition": defin, "source": s(get("Source")),
-                                "confidence": s(get("Confidence")), "base": s(get("Household Base"))})
+                                "confidence": s(get("Confidence")), "base": s(get("Household Base")), "tbl": tbl})
             k += 1
-    else:
-        d["warnings"].append("income table not found")
     # notes + extras
     pn = find(g, lambda v: v.lower().startswith("notes & sources"))
     pa = find(g, lambda v: v.upper().startswith("ADDITIONAL COUNTRY-SPECIFIC"))
@@ -205,7 +209,7 @@ def main():
     CREATE TABLE age_single(country TEXT, age INT, male REAL, female REAL);  -- thousands; age 100 = 100+
     CREATE TABLE education(country TEXT, classification TEXT, level TEXT, share REAL, ord INT);
     CREATE TABLE income(country TEXT, ord INT, band TEXT, lower REAL, upper REAL, share REAL, currency TEXT, year TEXT,
-        definition TEXT, source TEXT, confidence TEXT, base TEXT);
+        definition TEXT, source TEXT, confidence TEXT, base TEXT, tbl INT);  -- tbl: which income table of the tab
     CREATE TABLE notes(country TEXT, ord INT, text TEXT);
     CREATE TABLE extras(country TEXT, ord INT, source_sheet TEXT, title TEXT, rows_json TEXT);
     CREATE TABLE refs(kind TEXT, country TEXT, data_json TEXT);
@@ -244,7 +248,7 @@ def main():
                      d["internet"], d["internet_src"], d["target"], json.dumps(d["warnings"])))
         con.executemany("INSERT INTO age_gender VALUES(?,?,?,?)", [(c["name"], x["gender"], x["age"], x["share"]) for x in d["age_gender"]])
         con.executemany("INSERT INTO education VALUES(?,?,?,?,?)", [(c["name"], x["classification"], x["level"], x["share"], i) for i, x in enumerate(d["education"])])
-        con.executemany("INSERT INTO income VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", [(c["name"], i, x["band"], x["lower"], x["upper"], x["share"], x["currency"], x["year"], x["definition"], x["source"], x["confidence"], x["base"]) for i, x in enumerate(d["income"])])
+        con.executemany("INSERT INTO income VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", [(c["name"], i, x["band"], x["lower"], x["upper"], x["share"], x["currency"], x["year"], x["definition"], x["source"], x["confidence"], x["base"], x["tbl"]) for i, x in enumerate(d["income"])])
         con.executemany("INSERT INTO notes VALUES(?,?,?)", [(c["name"], i, t) for i, t in enumerate(d["notes"])])
         ex = [(c["name"], i, c["sheet"], b["title"], json.dumps(b["rows"], default=str)) for i, b in enumerate(d["extras"])]
         if c["region_tab"] and c["region_tab"] in wb.sheetnames:

@@ -72,7 +72,7 @@ the same layout: a title in column B followed by *Internet penetration* and *Tar
 section into its own entry, *United Kingdom – England* etc. (codes GB-ENG, GB-SCT, GB-WLS, GB-NIR); the nations
 have no zip tab of their own. Their figures come from ONS mid-2024 population estimates (gender and age), Ofcom
 Technology Tracker 2026 (internet), OECD 2024 (education; England is the population-weighted mean of its 9
-regions) and DWP Households Below Average Income FYE 2025 (share of individuals in each UK income quintile).
+regions) and the DWP Family Resources Survey (gross household income bands, see below).
 
 For the UK and the nations the age splits use the ONS single-year ages in `data/ons_uk_age_sex.csv` instead of the
 UN data. To refresh them after the next ONS release, update `URL` in the script, run it, then rebuild the database:
@@ -80,6 +80,37 @@ UN data. To refresh them after the next ONS release, update `URL` in the script,
 ```bash
 .venv/bin/python scripts/fetch_ons_uk_ages.py
 ```
+
+The UK income tables (columns Q–Y of each section) are **gross household income bands** (before tax, share of
+households) from the DWP Family Resources Survey, the way survey respondents usually answer the income question.
+The £200 weekly bands are shown as annual amounts (×52). The last three years are pooled in 2024/25 prices, as DWP
+recommends for the smaller nations, and the UK is the sum of the four nations. The weighted household counts are in
+`data/frs_household_gross_income.csv`, copied from DWP Stat-Xplore (guest login; the exact query is in
+`scripts/add_frs_income.py`).
+
+### Household income: real, not equivalised
+
+Income tables show **actual household income** (or, where a country publishes nothing per household, income per
+household member), not equivalised income. The tables, with source, table ID and URL for each, are in
+`data/household_income.json`:
+
+- per household: UK and nations (DWP FRS), Germany, Austria, Switzerland, Netherlands, Belgium, France, Ireland,
+  Finland, Sweden, Norway, Spain, Portugal, Greece, Malta (2015, latest), Turkey
+- per family: Denmark, Iceland
+- per household member: Czech Republic, Poland, Slovakia, Bulgaria, Latvia, Estonia (persons 20–64)
+- still Eurostat EU-SILC equivalised (no official real distribution found yet): Luxembourg, Lithuania, Cyprus,
+  Serbia, Slovenia, Hungary, Croatia, Romania
+
+Bands as published, or decile/quartile limits where a country publishes only those (equal shares). To change or add
+a country, edit its entry in the JSON (for the UK: update the CSV and run `scripts/add_frs_income.py`) and run:
+
+```bash
+.venv/bin/python scripts/write_income_tables.py
+```
+
+It replaces each listed tab's income table (and helper cells that read from it) and patches only those sheets inside
+the workbook. Saving with openpyxl would drop the cached formula results that the importer reads in other tabs.
+The app shows every income table of a tab as its own card; Compare uses the first one.
 
 ## Deploy to Cloudflare Pages
 
