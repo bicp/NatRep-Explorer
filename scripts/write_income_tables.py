@@ -10,7 +10,8 @@ Each entry of the JSON names a Nat Rep tab ("sheet") and, for tabs with several 
   3. writes the new table with the standard headers (Country, Year, Currency, Income Definition, Income Band Local,
      % Households, Household Base, Source, Confidence) and a Total row: in the old table's place if the rows are
      free, otherwise to the right of everything else on the tab.
-Cell styles are copied from the table it replaces. Re-running with the same JSON gives the same workbook.
+Cell styles are copied from the table it replaces. An entry with "remove": true only deletes (steps 1-2): the tab
+then has no local income table, and the app shows only the comparable EUR bands from the HHI Comparable tab. Re-running with the same JSON gives the same workbook.
 
 Only the XML of the affected sheets changes; everything else in the file stays byte for byte the same. (Saving with
 openpyxl would drop the cached results of every formula in the workbook, which scripts/build_db.py reads.)
@@ -120,7 +121,9 @@ def replace_table(sh, e):
     a, b = secs[e.get("section")]
     in_row = lambda r: sorted(c for rr, c in sh.cells if rr == r)
     hr = next((r for r in range(a, b) if any(sh.value(r, c) == "Income Definition" for c in in_row(r))), None)
-    if hr is None: sys.exit(f"{e['sheet']} {e.get('section') or ''}: no income table")
+    if hr is None:
+        if e.get("remove"): return f"{e['sheet']}: no income table (already removed)"
+        sys.exit(f"{e['sheet']} {e.get('section') or ''}: no income table")
     heads = [c for c in in_row(hr) if sh.value(hr, c) == "Income Definition"]
     blocks, styles = [], None
     for j in heads:
@@ -146,6 +149,7 @@ def replace_table(sh, e):
         top = hr0 - 1 if any(sh.filled(hr0 - 1, c) for c in range(hc0, hc1 + 1)) else hr0  # its header row
         dead |= {(r, c) for r in range(top, hr1 + 1) for c in range(hc0, hc1 + 1)}
     for rc in dead: sh.cells.pop(rc, None)
+    if e.get("remove"): return f"{e['sheet']}: income table removed" + (f", and helper cells {len(helpers)}" if helpers else "")
     # where to write: the old place if every cell the new table needs there is free, else right of everything in
     # the rows it needs (column Q at the earliest)
     n = len(e["bands"]) + 2
@@ -169,6 +173,7 @@ def replace_table(sh, e):
 def main():
     entries = json.load(open(JSON, encoding="utf-8"))
     for e in entries:
+        if e.get("remove"): continue
         s = sum(x["share"] for x in e["bands"])
         if abs(s - 1) > 0.015: sys.exit(f"{e['country']}: shares sum to {s:.4f}")
     with zipfile.ZipFile(XLSX) as z:
@@ -194,7 +199,7 @@ def main():
     with zipfile.ZipFile(tmp, "w") as out:
         for info, d in infos: out.writestr(info, changed.get(info.filename, d), compress_type=info.compress_type)
     shutil.move(tmp, XLSX)
-    print(f"{len(entries)} income tables written on {len(changed)} tabs")
+    print(f"{sum(not e.get('remove') for e in entries)} income tables written, {sum(bool(e.get('remove')) for e in entries)} removed, on {len(changed)} tabs")
 
 
 if __name__ == "__main__":

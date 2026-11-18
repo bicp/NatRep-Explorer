@@ -334,8 +334,7 @@
         ${splitCard(GA_CARD, '<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/>', "Gender × age")}
         ${splitCard(SPLIT_CARD, '<path d="M3 3v18h18"/><path d="M7 16v-3M11 16V8M15 16v-6M19 16V5"/>', "Age splits")}
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Education</h2></div><div id="edu"></div></div>
-        <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>${incomeTitle(d.incomes[0], 0)}</h2></div><div id="inc-0"></div></div>
-        ${d.incomes.slice(1).map((inc, k) => `<div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>${incomeTitle(inc, k + 1)}</h2></div><div id="inc-${k + 1}"></div></div>`).join("")}
+        ${d.incomes.map((inc, k) => `<div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>${incomeTitle(inc, k)}</h2></div><div id="inc-${k}"></div></div>`).join("")}
         <div class="card"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>Household income – comparable EUR bands</h2><small>HHI Comparable tab</small></div><div id="hhi"></div></div>
         <div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Zip codes</h2><small>${zipInfo}</small></div><div id="zipcard"></div></div>
         ${d.extras.length ? `<div class="card full"><div class="card-head"><h2><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Additional country-specific tables</h2><small>kept from the original sheets</small></div><div id="extras"></div></div>` : ""}
@@ -439,8 +438,9 @@
       data: { labels: rows.map((r) => r.level.length > 34 ? r.level.slice(0, 32) + "…" : r.level), datasets: [{ data: rows.map((r) => r.share == null ? null : r.share * 100), ...bar(css("--s1")) }] },
       options: { indexAxis: "y", scales: { ...pctAxis("x"), y: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: pctTip } } }));
 
-    // income: one card per income table of the tab (usually one; the UK has DWP HBAI quintiles and FRS gross bands)
-    (d.incomes.length ? d.incomes : [[]]).forEach((inc, t) => {
+    // income: one card per income table of the tab (usually one; the UK has DWP HBAI quintiles and FRS gross bands;
+    // none where no real household distribution is published, e.g. Cyprus: then only the comparable EUR bands show)
+    d.incomes.forEach((inc, t) => {
     const has = inc.some((r) => r.share != null);
     const i0 = inc[0] || {};
     $("#inc-" + t).innerHTML = !inc.length ? '<p class="muted">No income table.</p>' : `
@@ -554,7 +554,8 @@
       ${cmpRows.map(([label, fn, isPct, f]) => { const vals = ds.map(fn); const nums = vals.filter((v) => typeof v === "number");
         const max = nums.length > 1 ? Math.max(...nums) : null;
         return `<tr><td>${esc(label)}</td>${vals.map((v) => `<td class="num ${isPct && v === max ? "best" : ""}">${v == null ? "–" : isPct ? `${pct(v)} <span class="muted">(${int(v * N)})</span>` : f(v)}</td>`).join("")}</tr>`; }).join("")}</tbody></table>`;
-    $("#k-inc").innerHTML = ds.map((d) => `<div><h3><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[d.name]}"></i> ${esc(d.name)} <span class="muted">· ${esc(d.income[0]?.currency || "")} ${esc(d.income[0]?.year || "")}</span></h3>
+    $("#k-inc").innerHTML = ds.map((d) => !d.income.length ? `<div><h3><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[d.name]}"></i> ${esc(d.name)}</h3>
+      <p class="small muted">No local income table: see the comparable EUR bands.</p></div>` : `<div><h3><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[d.name]}"></i> ${esc(d.name)} <span class="muted">· ${esc(d.income[0]?.currency || "")} ${esc(d.income[0]?.year || "")}</span></h3>
       <table><tbody>${d.income.map((r) => `<tr><td>${esc(r.band)}</td><td class="num">${r.share == null ? "–" : pct(r.share)}</td></tr>`).join("")}</tbody></table>
       <div class="small muted">${esc(d.income[0]?.definition || "")}</div></div>`).join("");
     window._cmp = { ds, N };

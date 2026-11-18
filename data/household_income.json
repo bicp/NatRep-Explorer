@@ -1349,166 +1349,22 @@
   "sheet": "Cyprus",
   "section": null,
   "country": "Cyprus",
-  "year": "2023",
-  "currency": "EUR",
-  "definition": "Annual net household income (not equivalised); tenths of households with the average income of each; cut-offs are midpoints between neighbouring group averages (approximate, not published)",
-  "source": "CYSTAT, Household Budget Survey 2023, CYSTAT-DB table 1918225E (net income by income decile)",
-  "base": "358,977 households",
-  "confidence": "Medium",
-  "basis": "per household (group averages)",
-  "url": "https://cystatdb.cystat.gov.cy/api/v1/en/8.CYSTAT-DB/Living%20Conditions,%20Social%20Protection/Household%20Budget%20Survey/Mean%20Annual%20Income/Mean%20Annual%20Household%20Income/1918225E.px (report: https://library.cystat.gov.cy/NEW/HBS-2023-EN-040825.pdf)",
-  "bands": [
-   {
-    "label": "D1: up to ~€15,856 (avg €12,529)",
-    "share": 0.1
-   },
-   {
-    "label": "D2: ~€15,856–21,540 (avg €19,182)",
-    "share": 0.1
-   },
-   {
-    "label": "D3: ~€21,540–26,372 (avg €23,897)",
-    "share": 0.1
-   },
-   {
-    "label": "D4: ~€26,372–31,887 (avg €28,846)",
-    "share": 0.1
-   },
-   {
-    "label": "D5: ~€31,887–38,506 (avg €34,928)",
-    "share": 0.1
-   },
-   {
-    "label": "D6: ~€38,506–45,720 (avg €42,084)",
-    "share": 0.1
-   },
-   {
-    "label": "D7: ~€45,720–54,042 (avg €49,357)",
-    "share": 0.1
-   },
-   {
-    "label": "D8: ~€54,042–65,756 (avg €58,727)",
-    "share": 0.1
-   },
-   {
-    "label": "D9: ~€65,756–107,426 (avg €72,785)",
-    "share": 0.1
-   },
-   {
-    "label": "D10: over ~€107,426 (avg €142,066)",
-    "share": 0.1
-   }
-  ]
+  "remove": true,
+  "note": "no real household income distribution is published; the local table is left out and the app shows the comparable EUR bands only"
  },
  {
   "sheet": "Romania",
   "section": null,
   "country": "Romania",
-  "year": "2024",
-  "currency": "RON",
-  "definition": "Monthly total income per person (not equivalised); tenths of households ranked by income per person, with the average per person and per household; cut-offs are midpoints between neighbouring group averages (approximate, not published)",
-  "source": "INS, 'Coordonate ale nivelului de trai în România. Veniturile și consumul populației, 2024' (household budget survey), Tabelul 2.6",
-  "base": "7.57m households",
-  "confidence": "Medium",
-  "basis": "per household member (group averages)",
-  "url": "https://insse.ro/cms/sites/default/files/field/publicatii/coordonate_ale_nivelului_de_trai_in_romania_2024.pdf",
-  "bands": [
-   {
-    "label": "D1: up to ~1,374 lei/person (avg 1,033 lei/person; 3,923 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D2: ~1,374–1,880 lei/person (avg 1,715 lei/person; 4,146 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D3: ~1,880–2,202 lei/person (avg 2,045 lei/person; 4,618 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D4: ~2,202–2,524 lei/person (avg 2,360 lei/person; 5,284 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D5: ~2,524–2,894 lei/person (avg 2,688 lei/person; 6,343 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D6: ~2,894–3,383 lei/person (avg 3,101 lei/person; 8,101 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D7: ~3,383–4,039 lei/person (avg 3,666 lei/person; 9,535 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D8: ~4,039–4,962 lei/person (avg 4,413 lei/person; 11,147 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D9: ~4,962–7,113 lei/person (avg 5,512 lei/person; 12,575 lei/household)",
-    "share": 0.1
-   },
-   {
-    "label": "D10: over ~7,113 lei/person (avg 8,714 lei/person; 17,029 lei/household)",
-    "share": 0.1
-   }
-  ]
+  "remove": true,
+  "note": "no real household income distribution is published; the local table is left out and the app shows the comparable EUR bands only"
  },
  {
   "sheet": "Slovenia",
   "section": null,
   "country": "Slovenia",
-  "year": "2024 income (SILC 2025)",
-  "currency": "EUR",
-  "definition": "Annual net disposable cash income per household member (not equivalised); tenths of persons with the average of each; cut-offs are midpoints between neighbouring group averages (approximate, not published)",
-  "source": "SURS, SiStat table 0867336S (income per household member by decile)",
-  "base": null,
-  "confidence": "Medium",
-  "basis": "per household member (group averages)",
-  "url": "https://pxweb.stat.si/SiStatData/api/v1/en/Data/0867336S.px (POST json-stat2 query: MERITVE=4,6; LETO=2025; DOHODEK=0; all deciles). Table last updated 2026-03-19.",
-  "bands": [
-   {
-    "label": "D1: up to ~€7,242 (avg €5,979)",
-    "share": 0.1
-   },
-   {
-    "label": "D2: ~€7,242–9,221 (avg €8,505)",
-    "share": 0.1
-   },
-   {
-    "label": "D3: ~€9,221–10,566 (avg €9,937)",
-    "share": 0.1
-   },
-   {
-    "label": "D4: ~€10,566–11,851 (avg €11,196)",
-    "share": 0.1
-   },
-   {
-    "label": "D5: ~€11,851–13,236 (avg €12,506)",
-    "share": 0.1
-   },
-   {
-    "label": "D6: ~€13,236–14,801 (avg €13,965)",
-    "share": 0.1
-   },
-   {
-    "label": "D7: ~€14,801–16,704 (avg €15,637)",
-    "share": 0.1
-   },
-   {
-    "label": "D8: ~€16,704–19,308 (avg €17,772)",
-    "share": 0.1
-   },
-   {
-    "label": "D9: ~€19,308–25,714 (avg €20,843)",
-    "share": 0.1
-   },
-   {
-    "label": "D10: over ~€25,714 (avg €30,584)",
-    "share": 0.1
-   }
-  ]
+  "remove": true,
+  "note": "no real household income distribution is published; the local table is left out and the app shows the comparable EUR bands only"
  },
  {
   "sheet": "Hungary",
@@ -1569,36 +1425,8 @@
   "sheet": "Lithuania",
   "section": null,
   "country": "Lithuania",
-  "year": "2025",
-  "currency": "EUR",
-  "definition": "Monthly net disposable income per household member and per household (not equivalised), by fifths of persons; the fifths are ranked by equivalised income, so no cut-offs can be given",
-  "source": "Statistics Lithuania, table S3R585_M3080103 (disposable income by income quintile group)",
-  "base": null,
-  "confidence": "Medium",
-  "basis": "per household member (group averages)",
-  "url": "https://osp-rs.stat.gov.lt/ords/ipospp/ospp/rest_xml/data/S3R585_M3080103/?startPeriod=2024 (structure: https://osp-rs.stat.gov.lt/ords/ipospp/ospp/rest_xml/datastructure/LSD/M3080103)",
-  "bands": [
-   {
-    "label": "Lowest 20%: avg €375/member, €514/household",
-    "share": 0.2
-   },
-   {
-    "label": "Second 20%: avg €634/member, €1,058/household",
-    "share": 0.2
-   },
-   {
-    "label": "Middle 20%: avg €837/member, €1,681/household",
-    "share": 0.2
-   },
-   {
-    "label": "Fourth 20%: avg €1,130/member, €2,386/household",
-    "share": 0.2
-   },
-   {
-    "label": "Top 20%: avg €2,167/member, €4,199/household",
-    "share": 0.2
-   }
-  ]
+  "remove": true,
+  "note": "no real household income distribution is published; the local table is left out and the app shows the comparable EUR bands only"
  },
  {
   "sheet": "Croatia",
