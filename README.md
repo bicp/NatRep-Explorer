@@ -98,8 +98,13 @@ household member), not equivalised income. The tables, with source, table ID and
   Finland, Sweden, Norway, Spain, Portugal, Greece, Malta (2015, latest), Turkey
 - per family: Denmark, Iceland
 - per household member: Czech Republic, Poland, Slovakia, Bulgaria, Latvia, Estonia (persons 20–64)
-- still Eurostat EU-SILC equivalised (no official real distribution found yet): Luxembourg, Lithuania, Cyprus,
-  Serbia, Slovenia, Hungary, Croatia, Romania
+- income groups with their published average real income (no band distribution exists): Cyprus (tenths of
+  households), Romania (tenths of households, per person and per household), Slovenia (tenths of persons),
+  Hungary (2020, the latest per-capita series), Lithuania (fifths, averages only because the fifths are ranked by
+  equivalised income). Where groups are ranked by the income shown, cut-offs are midpoints between neighbouring
+  averages and are labelled approximate.
+- Eurostat EU-SILC equivalised bands, labelled as such, with the real average or median household income in the
+  definition (only averages are published): Croatia, Serbia, Luxembourg
 
 Bands as published, or decile/quartile limits where a country publishes only those (equal shares). To change or add
 a country, edit its entry in the JSON (for the UK: update the CSV and run `scripts/add_frs_income.py`) and run:
