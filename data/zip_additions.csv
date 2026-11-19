@@ -9842,99 +9842,192 @@ Morocco ZIP,MA,32026,Zaouiat Sidi Abdelkader,Tanger-Tetouan-Al Hoceima,01,Al-Hoc
 Morocco ZIP,MA,32034,Zarkat,Tanger-Tetouan-Al Hoceima,01,Al-Hoceima,051,,,34.83295,-4.42524,4,"Barid Al-Maghrib 2018 locality codes (data.gov.ma), placed with GeoNames"
 Morocco ZIP,MA,32365,Zarkt,Tanger-Tetouan-Al Hoceima,01,Al-Hoceima,051,,,34.83295,-4.42524,4,"Barid Al-Maghrib 2018 locality codes (data.gov.ma), placed with GeoNames"
 Morocco ZIP,MA,16212,Zghira,Tanger-Tetouan-Al Hoceima,01,Ouezzane,,,,34.63839,-5.21857,4,"Barid Al-Maghrib 2018 locality codes (data.gov.ma), placed with OpenStreetMap"
-Argentina ZIP,AR,1001,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5926,-58.37497,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1001,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5989,-58.37114,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1002,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60835,-58.37497,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1002,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.37114,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1003,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60205,-58.37114,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1005,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59575,-58.37497,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1005,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.37497,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1007,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59417,-58.3788,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1009,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59575,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1010,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59365,-58.38263,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1010,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60205,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1014,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58945,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1015,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.38646,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1016,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5926,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1018,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5926,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1019,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5989,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1020,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60835,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1025,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60363,-58.39412,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1027,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6052,-58.39795,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1030,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60835,-58.40178,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1032,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60677,-58.40561,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1033,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60835,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1035,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.3788,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1039,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60835,-58.39603,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1041,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1042,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1046,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6052,-58.40178,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1047,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60205,-58.37689,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1050,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60205,-58.39795,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1050,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60205,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1052,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60205,-58.40178,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1054,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5989,-58.37689,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1001,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58664,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1001,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59088,-58.37727,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1001,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59871,-58.37121,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1002,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60828,-58.37383,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1002,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60448,-58.37298,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1003,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60394,-58.3716,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1004,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59582,-58.37391,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1004,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60299,-58.37391,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1005,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59581,-58.37543,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1005,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60346,-58.37505,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1006,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59366,-58.37588,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1006,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60176,-58.37653,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1007,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59311,-58.37865,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1007,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60068,-58.37784,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1008,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59852,-58.37915,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1008,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6023,-58.37915,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1009,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59444,-58.3822,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1009,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60014,-58.38046,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1010,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59382,-58.38281,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1010,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60458,-58.38189,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1011,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58826,-58.38635,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1011,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59065,-58.38214,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1012,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59582,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1012,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60068,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1013,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5969,-58.3857,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1013,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5996,-58.3857,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1014,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58966,-58.38739,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1014,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59168,-58.3857,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1015,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59852,-58.38701,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1015,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59744,-58.38701,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1015,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60474,-58.38652,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1016,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58628,-58.39181,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1016,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59321,-58.38583,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1017,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59798,-58.38832,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1017,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60419,-58.38832,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1018,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59346,-58.38922,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1019,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59699,-58.38979,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1019,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60392,-58.38963,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1020,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59582,-58.39225,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1020,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60542,-58.39086,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1021,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59111,-58.38926,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1021,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59096,-58.38701,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1022,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60716,-58.39225,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1022,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60392,-58.39225,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1023,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5955,-58.39356,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1024,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59042,-58.39028,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1025,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60613,-58.39398,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1026,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60392,-58.39705,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1027,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60395,-58.39844,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1028,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60122,-58.40011,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1029,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.605,-58.40076,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1030,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60287,-58.40249,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1031,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60338,-58.40404,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1032,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60575,-58.40541,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1033,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60932,-58.39356,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1033,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60932,-58.38963,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1033,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60828,-58.38337,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1034,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60978,-58.40273,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1035,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60529,-58.37845,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1036,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60716,-58.38177,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1037,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60759,-58.38832,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1038,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6059,-58.38024,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1039,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60826,-58.3992,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1040,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60716,-58.39946,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1041,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60487,-58.38133,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1042,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60478,-58.38816,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1043,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6037,-58.38046,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1044,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60608,-58.39814,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1045,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.605,-58.3988,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1046,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60503,-58.40203,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1047,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60231,-58.37641,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1048,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60284,-58.38636,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1049,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6014,-58.37784,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1050,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60183,-58.39564,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1050,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60181,-58.38887,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1051,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60284,-58.39552,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1052,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60275,-58.40175,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1053,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60014,-58.37871,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1054,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59865,-58.37709,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1054,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59852,-58.37129,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1055,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5996,-58.39225,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1055,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5989,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1059,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59575,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1060,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59575,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1055,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60014,-58.38799,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1056,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60068,-58.39793,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1057,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59759,-58.37765,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1058,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59649,-58.37866,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1059,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59554,-58.38124,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1060,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5971,-58.39133,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1061,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.596,-58.39007,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1061,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5942,-58.38046,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1062,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59528,-58.39007,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1062,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59312,-58.38112,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1063,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.62579,-58.3649,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1063,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62251,-58.36785,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1064,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62009,-58.36969,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1065,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.37129,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1066,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62066,-58.3726,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1067,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60835,-58.37497,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1068,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.37497,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1068,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61954,-58.37418,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1069,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61958,-58.37588,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1071,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61842,-58.37897,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1071,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.3788,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1072,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61904,-58.38046,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1073,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.38177,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1073,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6115,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1074,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.38308,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1075,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62066,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1063,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60905,-58.36965,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1063,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62188,-58.36794,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1064,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61256,-58.37129,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1064,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61902,-58.36996,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1065,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61958,-58.37129,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1066,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6104,-58.37391,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1066,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61976,-58.3726,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1067,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60936,-58.3747,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1068,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61522,-58.37444,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1068,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61883,-58.37409,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1069,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6131,-58.37653,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1069,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61818,-58.37574,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1070,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61796,-58.37784,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1070,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61243,-58.37784,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1071,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61827,-58.37903,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1071,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61327,-58.37911,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1072,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6185,-58.38046,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1072,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6131,-58.38046,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1073,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61958,-58.38177,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1073,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61292,-58.38187,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1074,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61958,-58.38308,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1074,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61364,-58.38308,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1075,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1075,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61499,-58.38439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1076,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.3857,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1076,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6115,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1076,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61419,-58.38608,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1078,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62162,-58.38996,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1078,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.39029,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1080,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61364,-58.39356,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1080,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6212,-58.39225,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1082,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6115,-58.40178,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1083,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6115,-58.40561,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1090,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6115,-58.39603,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1091,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6115,-58.37497,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1095,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.38455,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1096,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61465,-58.39795,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1096,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1097,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61465,-58.37114,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1081,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61256,-58.39618,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1082,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61227,-58.40038,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1083,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61283,-58.40509,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1084,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60608,-58.37653,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1085,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60932,-58.38526,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1086,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6095,-58.37762,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1087,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6104,-58.37347,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1088,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6113,-58.38723,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1089,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61018,-58.39539,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1089,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6104,-58.38898,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1090,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61172,-58.39964,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1091,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61158,-58.37444,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1092,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61256,-58.37282,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1093,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61321,-58.38819,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1094,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61342,-58.39592,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1095,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61404,-58.37746,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1096,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61497,-58.39946,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1096,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6147,-58.39029,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1097,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61504,-58.37638,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1098,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61602,-58.37522,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1098,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6158,-58.36801,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1099,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6178,-58.38263,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1100,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6178,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1099,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61753,-58.3705,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1100,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61796,-58.38701,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1100,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.617,-58.38956,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1101,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61904,-58.38675,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1101,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61904,-58.37391,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1102,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.38548,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1102,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62012,-58.37653,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1103,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62112,-58.38453,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1103,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62112,-58.37557,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1104,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.57685,-58.39157,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1104,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.58544,-58.37323,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1106,PUERTO MADERO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.6052,-58.36156,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1106,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59417,-58.36923,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1104,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.57665,-58.39043,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1104,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.58437,-58.37473,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1106,PUERTO MADERO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60431,-58.36181,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1106,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.5948,-58.36931,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1106,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60032,-58.36867,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1107,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.62382,-58.34727,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1107,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61307,-58.36731,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1107,PUERTO MADERO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61687,-58.36163,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1107,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59575,-58.36348,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1107,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61188,-58.36767,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1107,PUERTO MADERO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61112,-58.36236,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1107,RETIRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.59727,-58.36461,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1107,SAN TELMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62115,-58.36669,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1110,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62228,-58.38701,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1111,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5926,-58.39412,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1112,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5863,-58.38646,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1117,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5926,-58.39987,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1119,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58945,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1120,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5989,-58.39987,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1121,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5989,-58.39412,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1123,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59575,-58.39603,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1125,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5926,-58.39795,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1127,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58945,-58.39412,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1128,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5863,-58.39412,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1129,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5863,-58.39029,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1110,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.61148,-58.38701,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1111,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59604,-58.39577,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1112,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5852,-58.3885,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1113,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59057,-58.39439,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1114,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5942,-58.39727,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1115,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59474,-58.39945,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1116,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59501,-58.3952,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1117,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59359,-58.40041,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1118,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5942,-58.40207,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1119,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58875,-58.39611,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1120,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.59996,-58.3988,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1120,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59914,-58.39823,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1121,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59829,-58.39724,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1122,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5969,-58.39749,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1123,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59547,-58.39717,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1124,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5942,-58.39749,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1125,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59191,-58.39859,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1126,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59074,-58.39539,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1127,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5895,-58.39435,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1128,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58872,-58.39501,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1129,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58705,-58.38991,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1130,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.63069,-58.38523,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1133,CONSTITUCION,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.62821,-58.39081,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1133,PARQUE PATRICIOS,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.63092,-58.39094,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
@@ -9980,72 +10073,120 @@ Argentina ZIP,AR,1166,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.639
 Argentina ZIP,AR,1167,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.64195,-58.36476,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1168,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.64458,-58.36348,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1169,BOCA,Ciudad Autonoma De Buenos Aires,C,COMUNA 4,,,,-34.64615,-58.36061,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1170,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60205,-58.40944,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1171,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6115,-58.41327,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1172,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59575,-58.41902,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1172,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59575,-58.41327,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1173,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60677,-58.41327,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1175,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6052,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1175,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.5926,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1178,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6115,-58.42093,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1179,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60363,-58.42093,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1180,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.5926,-58.42093,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1181,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60835,-58.42476,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1170,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60747,-58.41077,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1170,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59744,-58.40797,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1171,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60572,-58.41176,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1171,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59744,-58.41059,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1172,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60338,-58.41321,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1172,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.59906,-58.4119,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1172,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59544,-58.41907,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1172,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5966,-58.41258,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1173,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60739,-58.41345,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1173,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6104,-58.41452,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1173,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5969,-58.41321,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1174,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61016,-58.41525,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1174,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.5969,-58.41452,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1175,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60514,-58.41684,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1175,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59434,-58.41615,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1175,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59528,-58.41452,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1176,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60407,-58.41826,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1176,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59528,-58.41758,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1177,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60884,-58.41947,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1177,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.5942,-58.41845,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1178,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61203,-58.42071,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1179,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60467,-58.42101,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1179,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59366,-58.41976,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1180,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60122,-58.42238,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1180,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.5936,-58.41974,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1181,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6066,-58.42424,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1181,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59258,-58.42238,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1182,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.605,-58.425,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1182,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59636,-58.425,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1182,VILLA CRESPO,Ciudad Autonoma De Buenos Aires,C,COMUNA 15,,,,-34.59744,-58.425,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1183,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60835,-58.42859,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1183,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59575,-58.42476,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1184,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60441,-58.42763,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1186,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.5989,-58.40944,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1189,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.5989,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1189,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60205,-58.40561,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1190,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.5989,-58.42093,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1191,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60205,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1191,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6052,-58.41136,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1192,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60205,-58.41902,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1198,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60835,-58.41136,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1200,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60835,-58.42221,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1183,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59552,-58.42422,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1184,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60345,-58.42632,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1186,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.5996,-58.41321,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1186,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.59946,-58.40774,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1186,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59636,-58.4202,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1187,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.59852,-58.40797,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1187,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59744,-58.40928,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1188,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.59744,-58.42107,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1189,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.5993,-58.41648,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1189,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60118,-58.40819,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1190,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.59992,-58.41761,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1190,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60257,-58.40994,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1191,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60291,-58.41582,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1191,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60513,-58.41197,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1192,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60145,-58.41953,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1192,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60284,-58.4119,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1193,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60392,-58.40994,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1194,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60392,-58.41649,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1195,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60284,-58.42435,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1196,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60608,-58.41518,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1196,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60608,-58.41059,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1197,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60478,-58.42343,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1198,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60673,-58.41845,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1198,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60813,-58.41045,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1199,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60698,-58.42282,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1200,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60838,-58.42115,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1200,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60824,-58.41452,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1201,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.60959,-58.42041,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1201,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60932,-58.41125,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1202,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61148,-58.42325,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1203,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6104,-58.40928,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1204,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61148,-58.42172,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1205,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61465,-58.42859,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1206,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6115,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1207,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6115,-58.40944,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1208,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61465,-58.42284,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1209,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61465,-58.4171,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1209,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61465,-58.40561,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1211,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6179,-58.42309,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1214,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.5989,-58.40561,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1215,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61465,-58.40944,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1206,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61357,-58.4181,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1207,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61202,-58.40916,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1208,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61427,-58.42051,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1209,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61468,-58.41777,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1209,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61428,-58.40826,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1210,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6158,-58.42009,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1210,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61526,-58.4119,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1211,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61773,-58.42144,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1211,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61634,-58.40863,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1212,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61688,-58.42238,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1213,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60428,-58.40666,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1214,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60612,-58.40713,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1214,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59744,-58.40535,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1215,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.60796,-58.40897,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1215,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.59744,-58.40666,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1216,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62008,-58.42192,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1216,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62351,-58.4213,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1217,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6185,-58.41976,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1217,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62282,-58.41976,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1218,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61836,-58.41766,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1218,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62336,-58.41714,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1219,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61792,-58.39859,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1219,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6171,-58.39856,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1219,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61958,-58.3988,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1220,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61868,-58.41539,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1220,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61823,-58.41518,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1220,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61904,-58.4119,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1220,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6212,-58.41321,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1220,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62363,-58.41157,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1221,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61836,-58.40879,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1221,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6178,-58.40897,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1221,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62142,-58.40895,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1222,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6158,-58.39356,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1222,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62012,-58.39389,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1223,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62009,-58.41816,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1223,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6185,-58.40863,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1223,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61796,-58.40622,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1223,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62012,-58.40142,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1224,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.61836,-58.41715,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1224,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61796,-58.41125,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1224,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62228,-58.41059,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1225,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61883,-58.40173,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1225,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61871,-58.40038,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1225,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62108,-58.41389,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1225,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61969,-58.40535,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1226,ALMAGRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62112,-58.42018,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1226,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.6212,-58.41714,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1227,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61791,-58.39979,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1227,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61713,-58.39655,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1227,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62008,-58.3994,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1228,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62255,-58.41878,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1229,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61796,-58.40339,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1229,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.6171,-58.40325,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1229,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62181,-58.39959,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1230,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62408,-58.41751,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1230,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62116,-58.40009,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1231,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61827,-58.40587,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1231,BALVANERA,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.61771,-58.40593,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1231,BOEDO,Ciudad Autonoma De Buenos Aires,C,COMUNA 5,,,,-34.62416,-58.41479,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1231,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62282,-58.40617,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1232,SAN CRISTOBAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 3,,,,-34.62357,-58.40038,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
@@ -10149,12 +10290,14 @@ Argentina ZIP,AR,1407,VILLA LURO,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,
 Argentina ZIP,AR,1407,VILLA SANTA RITA,Ciudad Autonoma De Buenos Aires,C,COMUNA 11,,,,-34.6178,-58.48748,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1407,VILLA SOLDATI,Ciudad Autonoma De Buenos Aires,C,COMUNA 8,,,,-34.65875,-58.45923,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1408,LINIERS,Ciudad Autonoma De Buenos Aires,C,COMUNA 9,,,,-34.6445,-58.52147,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1408,MONSERRAT,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60716,-58.36998,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1408,MONTE CASTRO,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,-34.62489,-58.51668,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1408,SAN NICOLAS,Ciudad Autonoma De Buenos Aires,C,COMUNA 1,,,,-34.60608,-58.36867,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1408,VERSALLES,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,-34.63088,-58.52375,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1408,VILLA LURO,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,-34.6409,-58.50647,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1408,VILLA REAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,-34.62095,-58.52657,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1414,CHACARITA,Ciudad Autonoma De Buenos Aires,C,COMUNA 15,,,,-34.58945,-58.44519,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1414,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.58667,-58.43377,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1414,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.58901,-58.42888,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1414,VILLA CRESPO,Ciudad Autonoma De Buenos Aires,C,COMUNA 15,,,,-34.59798,-58.44104,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1416,CABALLITO,Ciudad Autonoma De Buenos Aires,C,COMUNA 6,,,,-34.6088,-58.4554,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1416,FLORES,Ciudad Autonoma De Buenos Aires,C,COMUNA 7,,,,-34.62095,-58.47455,3,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
@@ -10175,8 +10318,8 @@ Argentina ZIP,AR,1419,VILLA PUEYRREDON,Ciudad Autonoma De Buenos Aires,C,COMUNA 
 Argentina ZIP,AR,1419,VILLA REAL,Ciudad Autonoma De Buenos Aires,C,COMUNA 10,,,,-34.61465,-58.53104,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1424,CABALLITO,Ciudad Autonoma De Buenos Aires,C,COMUNA 6,,,,-34.6232,-58.43433,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1424,PARQUE CHACABUCO,Ciudad Autonoma De Buenos Aires,C,COMUNA 7,,,,-34.63513,-58.43242,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1425,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.57685,-58.41377,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
-Argentina ZIP,AR,1425,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58504,-58.40082,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1425,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.5812,-58.41347,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
+Argentina ZIP,AR,1425,RECOLETA,Ciudad Autonoma De Buenos Aires,C,COMUNA 2,,,,-34.58686,-58.40148,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1426,BELGRANO,Ciudad Autonoma De Buenos Aires,C,COMUNA 13,,,,-34.56583,-58.45157,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1426,COLEGIALES,Ciudad Autonoma De Buenos Aires,C,COMUNA 13,,,,-34.57426,-58.45044,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode
 Argentina ZIP,AR,1426,PALERMO,Ciudad Autonoma De Buenos Aires,C,COMUNA 14,,,,-34.56577,-58.43304,4,Buenos Aires city address service (USIG): centre of the addresses sampled in each postcode

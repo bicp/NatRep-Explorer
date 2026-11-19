@@ -199,11 +199,12 @@ checked and corrected:
   `data/br_municipios.csv`), so radius search works at municipality level.
 - **Morocco:** the GeoNames file has no codes for the big cities; the official Barid Al-Maghrib 2018 lists
   (neighbourhood and locality codes, via data.gov.ma) were added, placed with GeoNames and OpenStreetMap.
-- **Argentina:** Buenos Aires city (4-digit codes 1000–1499) was missing; 224 of its codes were added (one row per
-  code and barrio) from the city's own address service (USIG), placed at the centre of the addresses sampled in each
-  code. The samples are in `data/caba_samples.jsonl`. The city was sampled every ~350 m; a denser pass over the centre,
-  where a code can cover only a few blocks, is about a quarter done. To continue it (it resumes where it stopped and
-  can be interrupted with Ctrl+C at any time; about an hour), then update the workbook and rebuild:
+- **Argentina:** Buenos Aires city (4-digit codes 1000–1499) was missing; 295 of its codes were added (516 rows,
+  one per code and barrio) from the city's own address service (USIG), placed at the centre of the addresses sampled
+  in each code. The samples (4,069 addresses) are in `data/caba_samples.jsonl`: the whole city every ~350 m, the
+  centre, Palermo and Recoleta every ~120 m, where a code can cover only a few blocks. To sample again (it skips points
+  already sampled, can be interrupted with Ctrl+C at any time, and the service answers about one address a second),
+  then update the workbook (new codes are added, existing ones get the new positions) and rebuild:
 
   ```bash
   .venv/bin/python scripts/caba_postcodes.py sample dense
