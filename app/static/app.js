@@ -663,19 +663,23 @@
     if (seq !== searchSeq) return;
     let zipHits = d.results.filter((r) => r.zip.replace(/[\s-]/g, "").toLowerCase().startsWith(q.replace(/[\s-]/g, "").toLowerCase()));
     let html = "";
-    // a full UK postcode (SS2 6BH): its own point from the ONS Postcode Directory (uk_postcodes), plus its district (SS2),
-    // which is what the zip list has; if the postcode isn't there (terminated, mistyped), the district only
+    // a full UK postcode (SS2 6BH): its own point from the ONS Postcode Directory (uk_postcodes), then its sector (SS2 6)
+    // and district (SS2), which are what the zip list has, the district at its ONS centre; if the postcode isn't there
+    // (terminated, mistyped), the sector and district only
     const uk = !zipHits.length && (!country || country === UK) && q.toUpperCase().match(UK_POSTCODE);
     let exact = null;
     if (uk) {
-      const dist = (await rows(`SELECT id, ${COLS} FROM zips WHERE zip_len = ? AND zip_norm = ? AND country = ?`, [uk[1].length, uk[1], UK])).slice(0, 1);
-      try { exact = (await rows("SELECT postcode, lat, lon FROM uk_postcodes WHERE pc = ?", [uk[1] + uk[2]]))[0] || null; } catch { exact = null; }
+      const one = async (code) => (await rows(`SELECT id, ${COLS} FROM zips WHERE zip_len = ? AND zip_norm = ? AND country = ? LIMIT 1`, [code.length, code.replace(/ /g, ""), UK]))[0];
+      const sector = await one(`${uk[1]} ${uk[2][0]}`), dist = await one(uk[1]);
+      let centre = null;
+      try {
+        exact = (await rows("SELECT postcode, lat, lon FROM uk_postcodes WHERE pc = ?", [uk[1] + uk[2]]))[0] || null;
+        centre = (await rows("SELECT lat, lon FROM uk_postcodes WHERE pc = ?", [uk[1]]))[0] || null;
+      } catch { exact = centre = null; }
       if (seq !== searchSeq) return;
-      if (exact) html += `<h3>UK postcode</h3><button class="hit" data-k="u0"><b>${esc(exact.postcode)}</b>${dist.length ? ` ${esc(dist[0].place)}` : ""}<span class="s">exact postcode (ONS Postcode Directory) · radius from here</span></button>`;
-      if (dist.length) {
-        zipHits = dist;
-        if (!exact) html += `<div class="note">${esc(uk[1] + " " + uk[2])} isn't a live postcode in the ONS Postcode Directory. Showing its district, ${esc(uk[1])}; its centre can be a few km from the postcode itself.</div>`;
-      }
+      if (exact) html += `<h3>UK postcode</h3><button class="hit" data-k="u0"><b>${esc(exact.postcode)}</b>${dist ? ` ${esc(dist.place)}` : ""}<span class="s">exact postcode (ONS Postcode Directory) · radius from here</span></button>`;
+      zipHits = [sector, dist && centre ? { ...dist, lat: centre.lat, lon: centre.lon, place: `${dist.place} (district centre)` } : dist].filter(Boolean);
+      if (zipHits.length && !exact) html += `<div class="note">${esc(uk[1] + " " + uk[2])} isn't a live postcode in the ONS Postcode Directory. Showing its ${sector ? "sector and " : ""}district instead.</div>`;
     }
     if (d.places.length) html += `<h3>Cities &amp; places</h3>` + d.places.map((p, i) => `<button class="hit" data-k="p${i}"><b>${esc(p.place)}</b><span class="s">${esc([p.admin1, p.country].filter(Boolean).join(", "))} · ${p.lat == null ? "no coordinates" : "radius from centre"}</span></button>${p.zips > 1 ? `<button class="hit sub" data-k="a${i}"><span class="s">↳ List all ${int(p.zips)} zip codes of ${esc(p.place)}</span></button>` : ""}`).join("");
     if (d.regions.length) html += `<h3>Regions</h3>` + d.regions.map((r, i) => `<button class="hit" data-k="r${i}"><b>${esc(r.value)}</b><span class="s">${r.level === "admin1" ? "State / region" : "Province / county"} · ${esc(r.country)} · ${int(r.n)} records</span></button>`).join("");

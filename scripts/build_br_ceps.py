@@ -78,7 +78,7 @@ def build(path):
     os.makedirs(os.path.join(DATA, "br_ceps"), exist_ok=True)
     out = os.path.join(DATA, "br_ceps", f"{uf}.csv.gz")
     basis = collections.Counter()
-    with gzip.open(out, "wt", encoding="utf-8", newline="") as fh:
+    with io.TextIOWrapper(gzip.GzipFile(out, "wb", mtime=0), encoding="utf-8", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["cep", "lat", "lon", "spread_m", "municipio", "localidade", "logradouro", "addresses", "households", "basis"])
         for cep in sorted(info):

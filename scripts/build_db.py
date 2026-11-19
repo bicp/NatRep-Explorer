@@ -39,6 +39,7 @@ BR_CEPS = os.path.join(os.path.dirname(__file__), "..", "data", "br_ceps")
 BR_CEP_STATES = {f.split(".")[0] for f in os.listdir(BR_CEPS) if f.endswith(".csv.gz")} if os.path.isdir(BR_CEPS) else set()
 BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.csv")
 UK_POSTCODES = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcodes.csv.gz")
+UK_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcode_areas.csv.gz")
 
 
 def s(v):
@@ -351,6 +352,31 @@ def main():
             con.executemany("INSERT OR IGNORE INTO uk_postcodes VALUES(?,?,?,?)",
                             ((r["postcode"].replace(" ", "").upper(), r["postcode"], float(r["lat"]), float(r["lon"])) for r in csv.DictReader(fh)))
         print(f"  UK postcodes: {con.execute('SELECT count(*) FROM uk_postcodes').fetchone()[0]:,} (ONS Postcode Directory)")
+    # UK postcode sectors (SS2 6) as zip rows, and district centres (SS2), both the mean of their live postcodes
+    # (data/uk_postcode_areas.csv.gz). The workbook's districts list places (villages) with their own points; a district
+    # with a single point gets the ONS centre. All district centres also go into uk_postcodes ("SS2"), for the search.
+    if os.path.exists(UK_AREAS):
+        with gzip.open(UK_AREAS, "rt", encoding="utf-8") as fh: areas = list(csv.DictReader(fh))
+        uk_name = next((c["name"] for c in countries if ISO2.get(c["name"]) == "GB" and c["zip_sheet"]), "United Kingdom")
+        drows = {}
+        for r in con.execute("SELECT id, zip, place, admin1, admin2, lat, lon FROM zips WHERE iso2 = 'GB'"): drows.setdefault(r[1], []).append(r)
+        dist = {a["code"]: a for a in areas if a["level"] == "district"}
+        moved = [(float(dist[z]["lat"]), float(dist[z]["lon"]), json.dumps({"Point": "district centre (ONS Postcode Directory)"}), rs[0][0])
+                 for z, rs in drows.items() if len(rs) == 1 and z in dist]
+        con.executemany("UPDATE zips SET lat = ?, lon = ?, extra = ? WHERE id = ?", moved)
+        sec = []
+        for a in areas:
+            if a["level"] != "sector": continue
+            la, lo = float(a["lat"]), float(a["lon"])
+            rs = [r for r in drows.get(a["code"].split(" ")[0], []) if r[5] is not None]
+            near = min(rs, key=lambda r: (r[5] - la) ** 2 + ((r[6] - lo) * math.cos(math.radians(la))) ** 2) if rs else (None, None, "", "", "")
+            sec.append((uk_name, "GB", a["code"], near[2], near[3], near[4], "", la, lo,
+                        json.dumps({"Level": "postcode sector", "Live postcodes": int(a["postcodes"]), "Place": "nearest place in its district"})))
+        con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", sec)
+        con.executemany("INSERT OR IGNORE INTO uk_postcodes VALUES(?,?,?,?)",
+                        [(c, f"{c} (district centre)", float(a["lat"]), float(a["lon"])) for c, a in dist.items()])
+        total += len(sec)
+        print(f"  UK: {len(sec):,} postcode sectors added, {len(moved):,} single-point districts moved to their ONS centre")
 
     print("indexing…")
     finalize(con)
