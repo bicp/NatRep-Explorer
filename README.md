@@ -180,10 +180,55 @@ Pages allows 20,000 files per deploy. The database is published as one file per 
 grows past that, the database would need to move to R2 (Cloudflare's file storage, which serves byte ranges).
 GitHub rejects files over 100 MB; the workbook is ~75 MB today. If it grows past that, move it to Git LFS.
 
+### Zip coordinates
+
+Most zip tabs are GeoNames postal-code exports. An October 2026 clean-up of the workbook had guessed where lost
+decimal points belonged, and got it wrong for thousands of rows (Vadsø at longitude 2.97 instead of 29.7), and the
+Switzerland and Austria tabs had their coordinates scrambled between rows. In November 2026 the coordinates were
+checked and corrected:
+
+- **GeoNames-based tabs:** every row was compared with the current GeoNames postal codes; 34,575 rows that differed
+  got the GeoNames coordinates back (all of Switzerland and Austria, decimal slips in France, Spain, UK, Portugal,
+  Norway, Russia, Peru, Ecuador, Morocco, and small GeoNames refinements in Australia, Colombia, Iceland, Germany).
+- **Russia:** GeoNames itself places ~5,000 Russian postcodes at a same-named place in another region (Sakhalin
+  villages in Kaliningrad). These were moved to the matching place in their own region (GeoNames gazetteer), or,
+  without a match, to the centre of their postcode group (marked approximate).
+- **Turkey / Mexico:** Northern Cyprus postcodes placed on the mainland and four Mexican clusters with one wrong shared
+  point (Pánuco, Tecomán, Nadadores, Nuevo Laredo) were moved likewise.
+- **Brazil:** each CEP range has the coordinates of its municipality's seat (`scripts/add_brazil_coords.py`, from
+  `data/br_municipios.csv`), so radius search works at municipality level.
+- **Morocco:** the GeoNames file has no codes for the big cities; the official Barid Al-Maghrib 2018 lists
+  (neighbourhood and locality codes, via data.gov.ma) were added, placed with GeoNames and OpenStreetMap.
+- **Argentina:** Buenos Aires city (4-digit codes 1000–1499) was missing; 224 of its codes were added (one row per
+  code and barrio) from the city's own address service (USIG), placed at the centre of the addresses sampled in each
+  code. The samples are in `data/caba_samples.jsonl`. The city was sampled every ~350 m; a denser pass over the centre,
+  where a code can cover only a few blocks, is about a quarter done. To continue it (it resumes where it stopped and
+  can be interrupted with Ctrl+C at any time; about an hour), then update the workbook and rebuild:
+
+  ```bash
+  .venv/bin/python scripts/caba_postcodes.py sample dense
+  .venv/bin/python scripts/caba_postcodes.py build
+  .venv/bin/python scripts/add_zip_rows.py
+  ```
+
+Every change is listed in `data/zip_coord_fixes.csv` (sheet, row, old and new coordinates, source) and every added row
+in `data/zip_additions.csv`; each tab's note (cell B2) says what was changed. To check the coordinates again after a
+workbook update, rebuild the database and run:
+
+```bash
+.venv/bin/python scripts/check_zip_coords.py      # summary + zip_coordinate_check.csv with the flagged rows
+.venv/bin/python scripts/apply_zip_fixes.py       # applies data/zip_coord_fixes.csv (only rows still holding the old value)
+.venv/bin/python scripts/add_zip_rows.py          # appends data/zip_additions.csv (skips rows already there)
+```
+
+Remaining flags are mostly real places in very large regions (Western Australia, Yakutia, Baja California) or remote
+islands; a few hundred scattered GeoNames rows (Bulgaria, Argentina, Uruguay) carry a wrong region label rather than a
+wrong point and were left as they are.
+
 ## Data notes
 
-- Radius search needs coordinates. **India** and **Brazil** zip tabs have none (Brazil is CEP ranges), so for those
-  you can search and export by place/region, but not by radius.
+- Radius search needs coordinates. **India**'s zip tab has none, so there you can search and export by place/region,
+  but not by radius. **Brazil** has one point per municipality (its seat), so a radius finds whole municipalities.
 - No zip tabs exist for Cyprus, Finland, Greece, Hong Kong, Saudi Arabia, Taiwan and Vietnam.
 - Saudi Arabia, Taiwan and Vietnam publish reference income figures only (no % by band).
 - Distances are straight-line (haversine) from the selected point to each zip's centre point.

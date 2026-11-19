@@ -310,7 +310,8 @@ def main():
             elif sheet == "Brazil ZIP":
                 if not s(r[3]): continue
                 extra = {"Range type": s(r[5]), "Situation": s(r[4])}
-                batch.append((c["name"], iso, s(r[3]), s(r[2]), s(r[1]), "", "", None, None, json.dumps(extra, ensure_ascii=False)))
+                lat, lon = (num(r[10]), num(r[11])) if len(r) > 11 else (None, None)  # municipal seat (scripts/add_brazil_coords.py)
+                batch.append((c["name"], iso, s(r[3]), s(r[2]), s(r[1]), "", "", lat, lon, json.dumps(extra, ensure_ascii=False)))
             else:
                 if len(r) < 11 or not s(r[1]): continue
                 batch.append((c["name"], iso, s(r[1]), s(r[2]), s(r[3]), s(r[5]), s(r[7]), num(r[9]), num(r[10]), None))
