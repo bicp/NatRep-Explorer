@@ -38,6 +38,7 @@ ONS_AGE_SOURCE = "ONS mid-year population estimates, mid-2024 (table MYE2)"
 BR_CEPS = os.path.join(os.path.dirname(__file__), "..", "data", "br_ceps")
 BR_CEP_STATES = {f.split(".")[0] for f in os.listdir(BR_CEPS) if f.endswith(".csv.gz")} if os.path.isdir(BR_CEPS) else set()
 BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.csv")
+UK_POSTCODES = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcodes.csv.gz")
 
 
 def s(v):
@@ -341,6 +342,15 @@ def main():
         con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
         total += len(batch)
         print(f"  {sheet}: done ({total:,} total, {round(time.time() - t0)}s)")
+
+    # UK: every live postcode -> its point (data/uk_postcodes.csv.gz, scripts/build_uk_postcodes.py), for exact lookups;
+    # the zips table keeps the postcode districts
+    con.execute("CREATE TABLE uk_postcodes(pc TEXT PRIMARY KEY, postcode TEXT, lat REAL, lon REAL) WITHOUT ROWID")
+    if os.path.exists(UK_POSTCODES):
+        with gzip.open(UK_POSTCODES, "rt", encoding="utf-8") as fh:
+            con.executemany("INSERT OR IGNORE INTO uk_postcodes VALUES(?,?,?,?)",
+                            ((r["postcode"].replace(" ", "").upper(), r["postcode"], float(r["lat"]), float(r["lon"])) for r in csv.DictReader(fh)))
+        print(f"  UK postcodes: {con.execute('SELECT count(*) FROM uk_postcodes').fetchone()[0]:,} (ONS Postcode Directory)")
 
     print("indexing…")
     finalize(con)

@@ -256,6 +256,15 @@ wrong point and were left as they are.
   but not by radius. **Brazil** has one point per CEP (from census addresses), so a radius finds streets and
   neighbourhoods.
 - Zip search ignores spaces and hyphens: `01310100` finds `01310-100`.
+- **UK:** the zip tab has postcode districts (SS2). A full postcode typed in the search (`SS2 6BH`, `ss26bh`) goes to
+  its own point from the ONS Postcode Directory (all ~1.8 million live postcodes, `data/uk_postcodes.csv.gz`, Open
+  Government Licence; contains Royal Mail, OS and ONS data), and the radius then lists the districts around it. A postcode
+  that isn't there (terminated or mistyped) falls back to its district, with a note. To refresh after the next quarterly
+  release (search "ONS Postcode Directory" on the ONS Open Geography Portal), then rebuild the database:
+
+  ```bash
+  .venv/bin/python scripts/build_uk_postcodes.py path/to/ONSPD_<MMM>_<YYYY>.zip   # -> data/uk_postcodes.csv.gz
+  ```
 - No zip tabs exist for Cyprus, Finland, Greece, Hong Kong, Saudi Arabia, Taiwan and Vietnam.
 - Saudi Arabia, Taiwan and Vietnam publish reference income figures only (no % by band).
 - Distances are straight-line (haversine) from the selected point to each zip's centre point.
