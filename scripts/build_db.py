@@ -5,7 +5,7 @@ Usage:  python scripts/build_db.py path/to/Global_Nat_Rep_and_Zip_Codes_Combined
 Re-run whenever the workbook is updated; the database is rebuilt from scratch and split into chunks in
 app/static/db/ (plus config.json), which the browser reads with HTTP range requests.
 """
-import csv, json, math, os, re, sqlite3, sys, time
+import csv, gzip, json, math, os, re, sqlite3, sys, time
 import openpyxl
 
 XLSX = sys.argv[1] if len(sys.argv) > 1 else "Global_Nat_Rep_and_Zip_Codes_Combined.xlsx"
@@ -33,6 +33,11 @@ UN_AGES = os.path.join(os.path.dirname(__file__), "..", "data", "un_wpp_age_sex.
 # replaces the UN figures for the countries it covers
 ONS_AGES = os.path.join(os.path.dirname(__file__), "..", "data", "ons_uk_age_sex.csv")
 ONS_AGE_SOURCE = "ONS mid-year population estimates, mid-2024 (table MYE2)"
+# Brazil: one point per CEP from IBGE census addresses, per state (data/br_ceps/<UF>.csv.gz, scripts/build_br_ceps.py);
+# a state with a file gets those CEPs instead of the workbook's CEP ranges
+BR_CEPS = os.path.join(os.path.dirname(__file__), "..", "data", "br_ceps")
+BR_CEP_STATES = {f.split(".")[0] for f in os.listdir(BR_CEPS) if f.endswith(".csv.gz")} if os.path.isdir(BR_CEPS) else set()
+BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.csv")
 
 
 def s(v):
@@ -295,6 +300,8 @@ def main():
     # zip codes
     total = 0
     by_sheet = {c["zip_sheet"]: c for c in countries if c["zip_sheet"]}
+    br_states = {}
+    br_mun = {r["codigo_ibge"]: r["nome"] for r in csv.DictReader(open(BR_MUN, encoding="utf-8"))} if os.path.exists(BR_MUN) else {}
     for sheet, c in by_sheet.items():
         ws = wb[sheet]; iso = ISO2.get(c["name"]); batch = []
         it = ws.iter_rows(min_row=4, values_only=True)
@@ -309,6 +316,8 @@ def main():
                 batch.append((c["name"], iso, s(r[0]), s(r[1]), s(r[3]), s(r[9]), "", lat, lon, json.dumps(extra)))
             elif sheet == "Brazil ZIP":
                 if not s(r[3]): continue
+                br_states[s(r[0])] = s(r[1])
+                if s(r[0]) in BR_CEP_STATES: continue  # this state has one row per CEP instead (added below)
                 extra = {"Range type": s(r[5]), "Situation": s(r[4])}
                 lat, lon = (num(r[10]), num(r[11])) if len(r) > 11 else (None, None)  # municipal seat (scripts/add_brazil_coords.py)
                 batch.append((c["name"], iso, s(r[3]), s(r[2]), s(r[1]), "", "", lat, lon, json.dumps(extra, ensure_ascii=False)))
@@ -318,6 +327,17 @@ def main():
             if len(batch) >= 50000:
                 con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
                 total += len(batch); batch = []
+        if sheet == "Brazil ZIP":
+            n0 = len(batch)
+            for uf in sorted(BR_CEP_STATES):
+                with gzip.open(os.path.join(BR_CEPS, f"{uf}.csv.gz"), "rt", encoding="utf-8") as fh:
+                    for r in csv.DictReader(fh):
+                        town = br_mun.get(r["municipio"], "")
+                        whole = r["basis"].startswith("whole town")
+                        extra = {"Addresses (Census 2022)": int(r["addresses"]), "Households": int(r["households"]), "Point": r["basis"]}
+                        batch.append((c["name"], iso, r["cep"], town if whole else r["localidade"] or town, br_states.get(uf, uf), town,
+                                      "" if whole else r["logradouro"], float(r["lat"]), float(r["lon"]), json.dumps(extra, ensure_ascii=False)))
+            print(f"  Brazil: {len(batch) - n0:,} CEPs from IBGE census addresses ({', '.join(sorted(BR_CEP_STATES))}), CEP ranges for the other states")
         con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
         total += len(batch)
         print(f"  {sheet}: done ({total:,} total, {round(time.time() - t0)}s)")
@@ -354,7 +374,7 @@ def finalize(con):
              CASE WHEN lat IS NULL THEN NULL ELSE
                min(CAST((lat + 90) * {CELLS_PER_DEG} AS INT), {rows - 1}) * {cols} + min(CAST((lon + 180) * {CELLS_PER_DEG} AS INT), {cols - 1})
              END AS cell,
-             replace(zip, ' ', ''), length(zip)
+             replace(replace(zip, ' ', ''), '-', ''), length(zip)  -- search ignores spaces and hyphens
       FROM zips ORDER BY cell IS NULL, cell, country, id;
     DROP TABLE zips;
     ALTER TABLE zips_sorted RENAME TO zips;

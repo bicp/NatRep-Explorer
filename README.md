@@ -176,9 +176,10 @@ mix old and new database files and show "database disk image is malformed".
 ### Limits
 
 Pages allows 20,000 files per deploy. The database is published as one file per 64 KB page (`PAGE_SIZE` in
-`scripts/build_db.py`; ~9,600 files today), so it fits up to ~1.3 GB – about twice today's size. If the workbook
-grows past that, the database would need to move to R2 (Cloudflare's file storage, which serves byte ranges).
-GitHub rejects files over 100 MB; the workbook is ~75 MB today. If it grows past that, move it to Git LFS.
+`scripts/build_db.py`; ~15,700 files / 1.03 GB today, 931,505 of the 2.4M zip rows being Brazilian CEPs), so it fits
+up to ~1.3 GB, about 280 MB more. Beyond that, a larger `PAGE_SIZE` (fewer, bigger files) or R2 (Cloudflare's file
+storage, which serves byte ranges) would be needed.
+GitHub rejects files over 100 MB; the workbook is ~66 MB today. If it grows past that, move it to Git LFS.
 
 ### Zip coordinates
 
@@ -196,7 +197,30 @@ checked and corrected:
 - **Turkey / Mexico:** Northern Cyprus postcodes placed on the mainland and four Mexican clusters with one wrong shared
   point (Pánuco, Tecomán, Nadadores, Nuevo Laredo) were moved likewise.
 - **Brazil:** each CEP range has the coordinates of its municipality's seat (`scripts/add_brazil_coords.py`, from
-  `data/br_municipios.csv`), so radius search works at municipality level.
+  `data/br_municipios.csv`), so radius search works at municipality level. Every state now has a file in `data/br_ceps/`, so
+  Brazil has one row per CEP instead, built from IBGE's 2022 census address file (CNEFE), see below. The ranges are
+  only used for a state without a file.
+
+### Brazil: one point per CEP (IBGE census addresses)
+
+IBGE's CNEFE lists every address counted in the 2022 census with its CEP, street and coordinates. Each CEP's point is
+the median of its addresses on its own street (the street CEP Aberto gives for it, or its most common street), which
+drops addresses filed under a mistyped CEP; small towns' generic CEPs (…-000) use all their addresses. The app shows the
+CEP's neighbourhood, municipality and street, and its number of addresses and households (Census 2022). CEPs with no
+census address (PO boxes, big companies) are not included. All 27 states: 931,505 CEPs (IBGE counts 931,499 CEPs
+with addresses); in every state 83–99% of street CEPs have their addresses within 250 m of the point, and the centre
+CEPs of 13 capitals checked are within 1.5 km of the city centre. CEP Aberto street names were used for São Paulo and
+Ceará; without them about 1% of CEPs sit on the wrong street (in Ceará 1.2% moved more than 1 km when they were
+added), so downloading CEP Aberto for more states and re-running the script improves those.
+
+To add a state: download its file (`<code>_<UF>.zip`) from
+[IBGE](https://ftp.ibge.gov.br/Cadastro_Nacional_de_Enderecos_para_Fins_Estatisticos/Censo_Demografico_2022/Arquivos_CNEFE/CSV/UF/)
+(1 GB for SP, 3.7 GB for all states), optionally its CEP Aberto files (free account, ODbL) into `data/cepaberto/` for
+the street names, then run and rebuild the database:
+
+```bash
+.venv/bin/python scripts/build_br_ceps.py path/to/35_SP.zip      # -> data/br_ceps/SP.csv.gz
+```
 - **Morocco:** the GeoNames file has no codes for the big cities; the official Barid Al-Maghrib 2018 lists
   (neighbourhood and locality codes, via data.gov.ma) were added, placed with GeoNames and OpenStreetMap.
 - **Argentina:** Buenos Aires city (4-digit codes 1000–1499) was missing; 295 of its codes were added (516 rows,
@@ -229,7 +253,9 @@ wrong point and were left as they are.
 ## Data notes
 
 - Radius search needs coordinates. **India**'s zip tab has none, so there you can search and export by place/region,
-  but not by radius. **Brazil** has one point per municipality (its seat), so a radius finds whole municipalities.
+  but not by radius. **Brazil** has one point per CEP (from census addresses), so a radius finds streets and
+  neighbourhoods.
+- Zip search ignores spaces and hyphens: `01310100` finds `01310-100`.
 - No zip tabs exist for Cyprus, Finland, Greece, Hong Kong, Saudi Arabia, Taiwan and Vietnam.
 - Saudi Arabia, Taiwan and Vietnam publish reference income figures only (no % by band).
 - Distances are straight-line (haversine) from the selected point to each zip's centre point.

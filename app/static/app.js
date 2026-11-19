@@ -171,7 +171,7 @@
     q = q.trim();
     const cw = country ? " AND country = ?" : "", ca = country ? [country] : [];
     // 1) zip codes starting with the query, shortest first: one index range per zip length
-    const zq = q.replace(/\s+/g, "").replace(/[%_]/g, "");
+    const zq = q.replace(/[\s-]+/g, "").replace(/[%_]/g, "");  // zip_norm has no spaces or hyphens
     const results = [];
     // no zip starts with more than zip_alpha_max non-digits, so a word like "Berlin" can't be a zip prefix
     const maybeZip = zq && zq.match(/^\D*/)[0].length <= META.zip_alpha_max;
@@ -658,7 +658,7 @@
     try { d = await search(q, country, 40); }
     catch (e) { if (seq === searchSeq) box.innerHTML = `<p class="hint">Search failed: ${esc(e.message)}</p>`; return; }
     if (seq !== searchSeq) return;
-    const zipHits = d.results.filter((r) => r.zip.replace(/\s/g, "").toLowerCase().startsWith(q.replace(/\s/g, "").toLowerCase()));
+    const zipHits = d.results.filter((r) => r.zip.replace(/[\s-]/g, "").toLowerCase().startsWith(q.replace(/[\s-]/g, "").toLowerCase()));
     let html = "";
     if (d.places.length) html += `<h3>Cities &amp; places</h3>` + d.places.map((p, i) => `<button class="hit" data-k="p${i}"><b>${esc(p.place)}</b><span class="s">${esc([p.admin1, p.country].filter(Boolean).join(", "))} · ${p.lat == null ? "no coordinates" : "radius from centre"}</span></button>${p.zips > 1 ? `<button class="hit sub" data-k="a${i}"><span class="s">↳ List all ${int(p.zips)} zip codes of ${esc(p.place)}</span></button>` : ""}`).join("");
     if (d.regions.length) html += `<h3>Regions</h3>` + d.regions.map((r, i) => `<button class="hit" data-k="r${i}"><b>${esc(r.value)}</b><span class="s">${r.level === "admin1" ? "State / region" : "Province / county"} · ${esc(r.country)} · ${int(r.n)} records</span></button>`).join("");

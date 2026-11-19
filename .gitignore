@@ -4,3 +4,6 @@ __pycache__/
 app/static/db/
 .wrangler/
 .DS_Store
+
+# CEP Aberto state downloads (ODbL, large) – processed by the importer, not committed
+data/cepaberto/
