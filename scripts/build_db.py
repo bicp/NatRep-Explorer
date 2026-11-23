@@ -5,7 +5,7 @@ Usage:  python scripts/build_db.py path/to/Global_Nat_Rep_and_Zip_Codes_Combined
 Re-run whenever the workbook is updated; the database is rebuilt from scratch and split into chunks in
 app/static/db/ (plus config.json), which the browser reads with HTTP range requests.
 """
-import csv, gzip, json, math, os, re, sqlite3, sys, time
+import collections, csv, gzip, json, math, os, re, sqlite3, sys, time
 import openpyxl
 
 XLSX = sys.argv[1] if len(sys.argv) > 1 else "Global_Nat_Rep_and_Zip_Codes_Combined.xlsx"
@@ -40,6 +40,15 @@ BR_CEP_STATES = {f.split(".")[0] for f in os.listdir(BR_CEPS) if f.endswith(".cs
 BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.csv")
 UK_POSTCODES = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcodes.csv.gz")
 UK_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcode_areas.csv.gz")
+# Estimated people around each zip point (GHSL 2025 population grid) and UN average household sizes, written by
+# scripts/estimate_population.py. Only the countries in POP_RELEASED get them (released region by region).
+ZIP_POP = os.path.join(os.path.dirname(__file__), "..", "data", "zip_population.csv.gz")
+HH_SIZE = os.path.join(os.path.dirname(__file__), "..", "data", "household_size.csv")
+POP_RELEASED = {
+    # Europe
+    "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IS", "IT", "LT",
+    "LU", "LV", "MC", "MT", "NL", "NO", "PL", "PT", "RO", "RS", "RU", "SE", "SI", "SK", "TR",
+}
 
 
 def s(v):
@@ -378,6 +387,7 @@ def main():
         total += len(sec)
         print(f"  UK: {len(sec):,} postcode sectors added, {len(moved):,} single-point districts moved to their ONS centre")
 
+    add_population(con)
     print("indexing…")
     finalize(con)
     con.close()
@@ -395,6 +405,34 @@ PAGE_SIZE = 65536
 CHUNK_BYTES = PAGE_SIZE
 
 
+def add_population(con):
+    """zips.pop / zips.hh: estimated people and households per zip row. Real figures win where the data has them:
+    US ZIP population (workbook), Brazil households per CEP (census addresses). UK districts get none (their postcode
+    sectors carry the people), so totals over a radius or region never count anyone twice."""
+    con.execute("ALTER TABLE zips ADD COLUMN pop INT")
+    con.execute("ALTER TABLE zips ADD COLUMN hh INT")
+    if not os.path.exists(ZIP_POP): return
+    size = {r["iso2"]: float(r["size"]) for r in csv.DictReader(open(HH_SIZE, encoding="utf-8"))} if os.path.exists(HH_SIZE) else {}
+    est = {}
+    with gzip.open(ZIP_POP, "rt", encoding="utf-8", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if r["iso2"] in POP_RELEASED: est[(r["iso2"], r["zip"], float(r["lat"]), float(r["lon"]))] = int(r["pop"])
+    upd, miss = [], collections.Counter()
+    for i, iso, z, la, lo, ex in con.execute("SELECT id, iso2, zip, lat, lon, extra FROM zips WHERE lat IS NOT NULL"):
+        if iso not in POP_RELEASED: continue
+        e = json.loads(ex) if ex else {}
+        p = est.get((iso, z, round(la, 5), round(lo, 5)))
+        if iso == "US" and num(e.get("Population")) is not None: p = int(num(e["Population"]))
+        if p is None:
+            if iso != "GB" or e.get("Level") == "postcode sector": miss[iso] += 1
+            continue
+        h = e.get("Households") if iso == "BR" and "Households" in e else (round(p / size[iso]) if iso in size else None)
+        upd.append((p, h, i))
+    con.executemany("UPDATE zips SET pop = ?, hh = ? WHERE id = ?", upd)
+    con.execute("INSERT OR REPLACE INTO meta VALUES('pop_countries', ?)", (json.dumps(sorted(POP_RELEASED)),))
+    print(f"  population: {len(upd):,} zip rows ({len(POP_RELEASED)} countries)" + (f", unmatched: {dict(miss)}" if miss else ""))
+
+
 def finalize(con):
     """Clean coordinates, store zips in grid-cell order and build the lookup tables the browser queries."""
     rows, cols = 180 * CELLS_PER_DEG, 360 * CELLS_PER_DEG
@@ -404,13 +442,14 @@ def finalize(con):
 
     -- nearby zips sit next to each other in the file, so a radius search reads a few contiguous ranges
     CREATE TABLE zips_sorted(id INTEGER PRIMARY KEY, country TEXT, iso2 TEXT, zip TEXT, place TEXT, admin1 TEXT,
-        admin2 TEXT, admin3 TEXT, lat REAL, lon REAL, extra TEXT, cell INT, zip_norm TEXT COLLATE NOCASE, zip_len INT);
-    INSERT INTO zips_sorted(country, iso2, zip, place, admin1, admin2, admin3, lat, lon, extra, cell, zip_norm, zip_len)
+        admin2 TEXT, admin3 TEXT, lat REAL, lon REAL, extra TEXT, cell INT, zip_norm TEXT COLLATE NOCASE, zip_len INT, pop INT, hh INT);
+    INSERT INTO zips_sorted(country, iso2, zip, place, admin1, admin2, admin3, lat, lon, extra, cell, zip_norm, zip_len, pop, hh)
       SELECT country, iso2, zip, place, admin1, admin2, admin3, lat, lon, extra,
              CASE WHEN lat IS NULL THEN NULL ELSE
                min(CAST((lat + 90) * {CELLS_PER_DEG} AS INT), {rows - 1}) * {cols} + min(CAST((lon + 180) * {CELLS_PER_DEG} AS INT), {cols - 1})
              END AS cell,
-             replace(replace(zip, ' ', ''), '-', ''), length(zip)  -- search ignores spaces and hyphens
+             replace(replace(zip, ' ', ''), '-', ''), length(zip),  -- search ignores spaces and hyphens
+             pop, hh
       FROM zips ORDER BY cell IS NULL, cell, country, id;
     DROP TABLE zips;
     ALTER TABLE zips_sorted RENAME TO zips;

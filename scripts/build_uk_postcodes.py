@@ -11,7 +11,8 @@ Output:
                                  that have coordinates; the database build turns it into a lookup table, so a full
                                  postcode typed in the search goes to its own point
   data/uk_postcode_areas.csv.gz  level (sector / district), code ("SS2 6" / "SS2"), lat, lon (mean of its live
-                                 postcodes), postcodes (how many) – the database build adds the sectors as zip rows and
+                                 postcodes), postcodes (how many), small_users (how many are "small user" postcodes, i.e.
+                                 ordinary addresses; a sector with none is PO boxes / large businesses only) – the database build adds the sectors as zip rows and
                                  uses the district centres for districts the workbook has as a single point
 """
 import collections, csv, gzip, io, os, sys, zipfile
@@ -25,7 +26,7 @@ def main(path):
     z = zipfile.ZipFile(path)
     name = next(n for n in z.namelist() if n.lower().startswith("data/onspd_") and n.lower().endswith("_uk.csv"))
     n = kept = 0
-    acc = {"sector": collections.defaultdict(lambda: [0.0, 0.0, 0]), "district": collections.defaultdict(lambda: [0.0, 0.0, 0])}
+    acc = {"sector": collections.defaultdict(lambda: [0.0, 0.0, 0, 0]), "district": collections.defaultdict(lambda: [0.0, 0.0, 0, 0])}
     with z.open(name) as fh, io.TextIOWrapper(gzip.GzipFile(OUT, "wb", mtime=0), encoding="utf-8", newline="") as out:
         w = csv.writer(out)
         w.writerow(["postcode", "lat", "lon"])
@@ -39,13 +40,13 @@ def main(path):
             w.writerow([pc, round(la, 5), round(lo, 5)]); kept += 1
             if " " not in pc: continue
             for level, code in (("sector", pc[:-2]), ("district", pc.split(" ")[0])):
-                a = acc[level][code]; a[0] += la; a[1] += lo; a[2] += 1
+                a = acc[level][code]; a[0] += la; a[1] += lo; a[2] += 1; a[3] += r["usrtypind"].strip() == "0"
     with io.TextIOWrapper(gzip.GzipFile(AREAS, "wb", mtime=0), encoding="utf-8", newline="") as out:
         w = csv.writer(out)
-        w.writerow(["level", "code", "lat", "lon", "postcodes"])
+        w.writerow(["level", "code", "lat", "lon", "postcodes", "small_users"])
         for level in ("district", "sector"):
-            for code, (sla, slo, k) in sorted(acc[level].items()):
-                w.writerow([level, code, round(sla / k, 5), round(slo / k, 5), k])
+            for code, (sla, slo, k, small) in sorted(acc[level].items()):
+                w.writerow([level, code, round(sla / k, 5), round(slo / k, 5), k, small])
     print(f"{name}: {n:,} postcodes, {kept:,} live with coordinates -> {OUT} ({os.path.getsize(OUT) / 1e6:.1f} MB)")
     print(f"  {len(acc['district']):,} districts, {len(acc['sector']):,} sectors -> {AREAS}")
 

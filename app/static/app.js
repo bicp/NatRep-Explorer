@@ -216,7 +216,7 @@
     for (let r = r0; r <= r1; r++) { ranges.push("cell BETWEEN ? AND ?"); args.push(r * ncols + c0, r * ncols + c1); }
     args.push(lat - dlat, lat + dlat, lon - dlon, lon + dlon, ...(country ? [country] : []));
     // "+country" keeps SQLite on the cell index instead of scanning the whole country
-    const cand = await rows(`SELECT ${COLS} FROM zips WHERE (${ranges.join(" OR ")})
+    const cand = await rows(`SELECT ${COLS}, pop, hh FROM zips WHERE (${ranges.join(" OR ")})
                              AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?${country ? " AND +country = ?" : ""}`, args);
     const byZip = new Map();
     for (const r of cand) {
@@ -225,6 +225,8 @@
       const key = r.country + "\u0000" + r.zip, cur = byZip.get(key);
       if (!cur) { r.distance_km = Math.round(d * 100) / 100; r.places = r.place ? [r.place] : []; byZip.set(key, r); continue; }
       if (r.place && !cur.places.includes(r.place)) cur.places.push(r.place);
+      // a zip listed at several points: its people are split between them
+      for (const k of ["pop", "hh"]) if (r[k] != null) cur[k] = (cur[k] ?? 0) + r[k];
       if (d < cur.distance_km) { for (const k of ["place", "admin1", "admin2", "admin3", "lat", "lon"]) cur[k] = r[k]; cur.distance_km = Math.round(d * 100) / 100; }
     }
     const out = [...byZip.values()].sort((a, b) => a.distance_km - b.distance_km);
@@ -236,7 +238,7 @@
     if (!["admin1", "admin2", "admin3", "place"].includes(level)) throw new Error("bad level");
     const nested = within && level !== "admin1";
     const results = await rows(`SELECT country, iso2, zip, group_concat(DISTINCT place) places, min(place) place, admin1, admin2, admin3,
-                                avg(lat) lat, avg(lon) lon FROM zips WHERE country=? AND ${level}=?${nested ? " AND admin1=?" : ""}
+                                avg(lat) lat, avg(lon) lon, sum(pop) pop, sum(hh) hh FROM zips WHERE country=? AND ${level}=?${nested ? " AND admin1=?" : ""}
                                 GROUP BY zip ORDER BY zip LIMIT ?`, [country, value, ...(nested ? [within] : []), MAX_ROWS]);
     for (const r of results) r.places = (r.places || "").split(",");
     return { country, level, value, count: results.length, results };
@@ -250,8 +252,9 @@
   const safeName = (s, n) => s.replace(/[^\p{L}\p{N}_-]+/gu, "_").slice(0, n);
   function zipsCsv(res, filename) {
     const cell = (v) => { v = String(v ?? ""); return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
-    const cols = ["country", "zip", "place", "admin1", "admin2", "admin3", "lat", "lon", "distance_km", "places"];
-    const lines = [["Country", "Zip code", "Place", "State / Region", "Province / County", "Community", "Latitude", "Longitude", "Distance (km)", "All places in zip"]];
+    const cols = ["country", "zip", "place", "admin1", "admin2", "admin3", "lat", "lon", "distance_km", "places", "pop", "hh"];
+    const lines = [["Country", "Zip code", "Place", "State / Region", "Province / County", "Community", "Latitude", "Longitude", "Distance (km)", "All places in zip",
+      "People (estimate)", "Households (estimate)"]];
     for (const r of res) lines.push(cols.map((c) => (c === "places" ? (r.places || []).join("; ") : r[c])));
     download(lines.map((l) => l.map(cell).join(",")).join("\r\n") + "\r\n", filename);
   }
@@ -633,7 +636,11 @@
     res.slice(0, MAXM).forEach((r) => { if (r.lat != null) L.circleMarker([r.lat, r.lon], { radius: 4, color: ring, weight: 1, fillColor: color, fillOpacity: 0.9 })
       .bindTooltip(`<b>${esc(r.zip)}</b> ${esc(r.place || "")}<br>${esc(r.admin1 || "")}${r.distance_km != null ? ` · ${r.distance_km} km` : ""}`).addTo(layer); });
     const MAXT = 2000;
-    $("#loc-summary").innerHTML = `<div><div class="count">${headline}</div><div class="small">${esc(sub)}${res.length > MAXM ? ` · map shows nearest ${int(MAXM)}` : ""}</div></div>
+    // estimated people / households: shown when the country has them (META.pop_countries)
+    const withPop = res.some((r) => r.pop != null);
+    const sum = (k) => res.reduce((t, r) => t + (r[k] || 0), 0), round = (v) => int(v >= 1000 ? Math.round(v / 100) * 100 : v);
+    const popLine = withPop ? `<div class="small" title="People living closer to each zip point than to any other (GHSL 2025 population grid), households from the UN average household size. Good for totals over an area; rough for a single zip. US population: census ZIP figures; Brazil households: 2022 census addresses.">≈ <b>${round(sum("pop"))}</b> people · <b>${round(sum("hh"))}</b> households <span class="muted">(estimate)</span></div>` : "";
+    $("#loc-summary").innerHTML = `<div><div class="count">${headline}</div><div class="small">${esc(sub)}${res.length > MAXM ? ` · map shows nearest ${int(MAXM)}` : ""}</div>${popLine}</div>
       <span style="flex:1"></span>
       <button class="btn ghost sm" id="copy-zips" ${res.length ? "" : "disabled"}>Copy zip list</button>
       <a class="btn sm" href="#" id="csv-zips" ${res.length ? "" : 'style="pointer-events:none;opacity:.45"'}>Download CSV</a>`;
@@ -642,8 +649,8 @@
       const txt = [...new Set(res.map((r) => r.zip))].join("\n");
       try { await navigator.clipboard.writeText(txt); toast(`Copied ${int(res.length)} zip codes`); } catch { toast("Copy failed – use Download CSV"); }
     });
-    $("#loc-table").innerHTML = res.length ? `<table><thead><tr><th>Zip</th><th>Place</th><th>Region</th><th>Province / county</th>${withDist ? '<th class="num">km</th>' : ""}<th>Country</th></tr></thead><tbody>
-      ${res.slice(0, MAXT).map((r) => `<tr><td><b>${esc(r.zip)}</b></td><td>${esc(r.place)}${r.places && r.places.length > 1 ? ` <span class="muted">+${r.places.length - 1}</span>` : ""}</td><td>${esc(r.admin1)}</td><td>${esc(r.admin2)}</td>${withDist ? `<td class="num">${r.distance_km}</td>` : ""}<td>${esc(r.iso2)}</td></tr>`).join("")}
+    $("#loc-table").innerHTML = res.length ? `<table><thead><tr><th>Zip</th><th>Place</th><th>Region</th><th>Province / county</th>${withDist ? '<th class="num">km</th>' : ""}${withPop ? '<th class="num" title="estimate">People</th><th class="num" title="estimate">Households</th>' : ""}<th>Country</th></tr></thead><tbody>
+      ${res.slice(0, MAXT).map((r) => `<tr><td><b>${esc(r.zip)}</b></td><td>${esc(r.place)}${r.places && r.places.length > 1 ? ` <span class="muted">+${r.places.length - 1}</span>` : ""}</td><td>${esc(r.admin1)}</td><td>${esc(r.admin2)}</td>${withDist ? `<td class="num">${r.distance_km}</td>` : ""}${withPop ? `<td class="num">${r.pop == null ? "" : int(r.pop)}</td><td class="num">${r.hh == null ? "" : int(r.hh)}</td>` : ""}<td>${esc(r.iso2)}</td></tr>`).join("")}
       </tbody></table>${res.length > MAXT ? `<p class="small muted" style="padding:8px">Showing the first ${int(MAXT)} – download the CSV for all ${int(res.length)}.</p>` : ""}` : '<p class="empty">No zip codes found.</p>';
   }
 
