@@ -639,7 +639,7 @@
     // estimated people / households: shown when the country has them (META.pop_countries)
     const withPop = res.some((r) => r.pop != null);
     const sum = (k) => res.reduce((t, r) => t + (r[k] || 0), 0), round = (v) => int(v >= 1000 ? Math.round(v / 100) * 100 : v);
-    const popLine = withPop ? `<div class="small" title="People living closer to each zip point than to any other (GHSL 2025 population grid), households from the UN average household size. Good for totals over an area; rough for a single zip. US population: census ZIP figures; Brazil households: 2022 census addresses.">≈ <b>${round(sum("pop"))}</b> people · <b>${round(sum("hh"))}</b> households <span class="muted">(estimate)</span></div>` : "";
+    const popLine = withPop ? `<div class="small" title="People living closer to each zip point than to any other (GHSL 2025 population grid), households from the UN average household size. Good for totals over an area; rough for a single zip. Census figures instead where available: US ZIP population, UK postcode sectors (Census 2021/2022), Brazil CEPs (2022 census dwellings).">≈ <b>${round(sum("pop"))}</b> people · <b>${round(sum("hh"))}</b> households <span class="muted">(estimate)</span></div>` : "";
     $("#loc-summary").innerHTML = `<div><div class="count">${headline}</div><div class="small">${esc(sub)}${res.length > MAXM ? ` · map shows nearest ${int(MAXM)}` : ""}</div>${popLine}</div>
       <span style="flex:1"></span>
       <button class="btn ghost sm" id="copy-zips" ${res.length ? "" : "disabled"}>Copy zip list</button>

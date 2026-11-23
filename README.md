@@ -272,7 +272,10 @@ the people living closer to it than to any other zip point of its country (cut a
 CC BY 4.0); where zip points are denser than the grid (city streets, buildings), a grid cell holding several of them
 splits its people equally between them, and zip rows at the same point share it equally. Households = people / the country's latest average household
 size in the [UN Database on Household Size and Composition 2026](https://population.un.org/Household/)
-(`data/household_size.csv`). Real figures replace the estimate where the data has them: US ZIP population (workbook);
+(`data/household_size.csv`). Real figures replace the estimate where the data has them: US ZIP population (workbook); UK postcode sectors from the census (people and households: England & Wales
+2021, ONS/Nomis tables P003 and P002; Scotland 2022, NRS Census 2022 Index; Northern Ireland 2021, NISRA), written to
+`data/uk_census_sectors.csv` by `scripts/build_uk_census.py` (see its header for the downloads; a sector without a
+census count, i.e. business-only or new since the census, gets none);
 Brazil per CEP from its 2022 census dwellings, scaled to the census's 72.4 M occupied households (the address file
 also counts empty and occasional-use dwellings), people = households × 2.79 (census average). UK: the postcode sectors carry the people and the districts
 none, so totals never count anyone twice.

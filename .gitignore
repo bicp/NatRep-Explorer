@@ -8,3 +8,4 @@ app/static/db/
 # CEP Aberto state downloads (ODbL, large) – processed by the importer, not committed
 data/cepaberto/
 data/popgrid/
+data/uk_census/

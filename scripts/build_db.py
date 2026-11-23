@@ -46,6 +46,9 @@ IN_PINCODES = os.path.join(os.path.dirname(__file__), "..", "data", "in_pincodes
 ZIP_POP = os.path.join(os.path.dirname(__file__), "..", "data", "zip_population.csv.gz")
 HH_SIZE = os.path.join(os.path.dirname(__file__), "..", "data", "household_size.csv")
 BR_OCCUPIED = 72_400_000  # occupied private households, IBGE Census 2022
+# UK postcode sectors: census usual residents and households (England & Wales and Northern Ireland 2021, Scotland 2022),
+# written by scripts/build_uk_census.py; they replace the estimate for UK sectors
+UK_CENSUS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_census_sectors.csv")
 POP_RELEASED = {
     # Europe
     "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IS", "IT", "LT",
@@ -432,7 +435,8 @@ CHUNK_BYTES = PAGE_SIZE
 
 def add_population(con):
     """zips.pop / zips.hh: estimated people and households per zip row. Real figures win where the data has them:
-    US ZIP population (workbook), Brazil per CEP from its census dwellings (CEPs are far denser than the 1 km population
+    US ZIP population (workbook), UK postcode sectors (census; a sector without a census count gets none: they are
+    business-only or new since the census), Brazil per CEP from its census dwellings (CEPs are far denser than the 1 km population
     grid): households = dwellings scaled to the 72.4 M occupied households of the 2022 census (the address file also
     counts empty and occasional-use dwellings), people = households x the census average household size. UK districts get none (their postcode
     sectors carry the people), so totals over a radius or region never count anyone twice."""
@@ -444,11 +448,15 @@ def add_population(con):
     with gzip.open(ZIP_POP, "rt", encoding="utf-8", newline="") as fh:
         for r in csv.DictReader(fh):
             if r["iso2"] in POP_RELEASED: est[(r["iso2"], r["zip"], float(r["lat"]), float(r["lon"]))] = int(r["pop"])
+    uk = {r["sector"]: (int(r["people"]), int(r["households"])) for r in csv.DictReader(open(UK_CENSUS, encoding="utf-8"))} if os.path.exists(UK_CENSUS) else {}
     upd, miss = [], collections.Counter()
     br_dwellings = sum(json.loads(ex).get("Households", 0) for (ex,) in con.execute("SELECT extra FROM zips WHERE iso2 = 'BR' AND extra LIKE '%Households%'")) or 1
     for i, iso, z, la, lo, ex in con.execute("SELECT id, iso2, zip, lat, lon, extra FROM zips WHERE lat IS NOT NULL"):
         if iso not in POP_RELEASED: continue
         e = json.loads(ex) if ex else {}
+        if iso == "GB" and uk:
+            if e.get("Level") == "postcode sector" and z in uk: upd.append((*uk[z], i))
+            continue
         p = est.get((iso, z, round(la, 5), round(lo, 5)))
         if iso == "US" and num(e.get("Population")) is not None: p = int(num(e["Population"]))
         if p is None:
