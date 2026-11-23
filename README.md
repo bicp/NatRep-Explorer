@@ -268,7 +268,7 @@ about half of single zips are within 25% (a zip's real area is not its "nearest 
 radius or a region; a single zip's figure is rough. Countries with few zip points (one per town or region) get large,
 rough areas. Countries without zip coordinates (India) have none.
 
-Released so far: Europe, the Americas and Asia-Pacific. The countries shown are listed in `POP_RELEASED` in `scripts/build_db.py`. To recompute (all countries in ~3 minutes,
+Released so far: all countries with zip coordinates except India. The countries shown are listed in `POP_RELEASED` in `scripts/build_db.py`. To recompute (all countries in ~3 minutes,
 or only the ISO2 codes given), download into `data/popgrid/` (not in git) the GHSL file
 `GHS_POP_E2025_GLOBE_R2023A_4326_30ss_V1_0.tif` (480 MB zip), Natural Earth's `ne_10m_admin_0_countries.geojson`
 and the UN `UNDESA_PD_2026_hh-size-composition.xlsx`, then run and rebuild the database:
