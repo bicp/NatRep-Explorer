@@ -235,6 +235,20 @@ the street names, then run and rebuild the database:
   .venv/bin/python scripts/caba_postcodes.py build
   .venv/bin/python scripts/add_zip_rows.py
   ```
+- **India:** the tab is the GeoNames list with its coordinates dropped. `scripts/build_in_pincodes.py` matches every
+  row back to the [GeoNames India file](https://download.geonames.org/export/zip/IN.zip) (CC BY 4.0) by pincode, place
+  and district (all 155,558 rows match) and writes `data/in_pincodes.csv.gz`, which the database build reads.
+  The points are uneven: 62% are the post office's own village or locality, but about half the pincodes sit on a
+  district or town centre that GeoNames shares between 10 or more pincodes (123 Bengaluru pincodes on one point, ~28 km
+  north of the city), marked "approximate" in the file. 357 rows more than 150 km from their own district (a
+  same-named village elsewhere) were moved to their pincode's other points in that district, or the district centre.
+  So in India a radius search is reliable at district level, rough inside big cities. India Post's official pincode
+  boundaries (data.gov.in, "All India Pincode Boundary") would give a real centre for every pincode, but the published
+  links were broken as of 2026. To refresh from a newer GeoNames file, then rebuild the database:
+
+  ```bash
+  .venv/bin/python scripts/build_in_pincodes.py path/to/IN.zip      # -> data/in_pincodes.csv.gz
+  ```
 
 Every change is listed in `data/zip_coord_fixes.csv` (sheet, row, old and new coordinates, source) and every added row
 in `data/zip_additions.csv`; each tab's note (cell B2) says what was changed. To check the coordinates again after a
@@ -266,7 +280,7 @@ none, so totals never count anyone twice.
 Checked against the US census ZIP populations: the national total is within 4% and the median zip is right, but only
 about half of single zips are within 25% (a zip's real area is not its "nearest point" area). Use the totals over a
 radius or a region; a single zip's figure is rough. Countries with few zip points (one per town or region) get large,
-rough areas. Countries without zip coordinates (India) have none.
+rough areas. India has none yet (its points are new and half of them are shared district centres).
 
 Released so far: all countries with zip coordinates except India. The countries shown are listed in `POP_RELEASED` in `scripts/build_db.py`. To recompute (all countries in ~3 minutes,
 or only the ISO2 codes given), download into `data/popgrid/` (not in git) the GHSL file
@@ -280,8 +294,8 @@ and the UN `UNDESA_PD_2026_hh-size-composition.xlsx`, then run and rebuild the d
 
 ## Data notes
 
-- Radius search needs coordinates. **India**'s zip tab has none, so there you can search and export by place/region,
-  but not by radius. **Brazil** has one point per CEP (from census addresses), so a radius finds streets and
+- Radius search works in every country with zip tabs. **India**'s points come from GeoNames and are partly
+  approximate (see "Zip coordinates"): good at district level, rough inside big cities. **Brazil** has one point per CEP (from census addresses), so a radius finds streets and
   neighbourhoods.
 - Zip search ignores spaces and hyphens: `01310100` finds `01310-100`.
 - **UK:** the zip tab has postcode districts (SS2) with their places. From the ONS Postcode Directory (Open Government

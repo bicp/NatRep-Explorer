@@ -40,6 +40,7 @@ BR_CEP_STATES = {f.split(".")[0] for f in os.listdir(BR_CEPS) if f.endswith(".cs
 BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.csv")
 UK_POSTCODES = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcodes.csv.gz")
 UK_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcode_areas.csv.gz")
+IN_PINCODES = os.path.join(os.path.dirname(__file__), "..", "data", "in_pincodes.csv.gz")  # scripts/build_in_pincodes.py
 # Estimated people around each zip point (GHSL 2025 population grid) and UN average household sizes, written by
 # scripts/estimate_population.py. Only the countries in POP_RELEASED get them (released region by region).
 ZIP_POP = os.path.join(os.path.dirname(__file__), "..", "data", "zip_population.csv.gz")
@@ -320,6 +321,15 @@ def main():
     by_sheet = {c["zip_sheet"]: c for c in countries if c["zip_sheet"]}
     br_states = {}
     br_mun = {r["codigo_ibge"]: r["nome"] for r in csv.DictReader(open(BR_MUN, encoding="utf-8"))} if os.path.exists(BR_MUN) else {}
+    # India: the tab has no coordinates; GeoNames' points by (pincode, place, district), else the pincode's first point
+    in_pts, in_zip = {}, {}
+    if os.path.exists(IN_PINCODES):
+        with gzip.open(IN_PINCODES, "rt", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                v = (float(r["lat"]), float(r["lon"]), r["point"])
+                in_pts.setdefault((r["zip"], r["place"].lower(), r["admin2"].lower()), v)
+                in_zip.setdefault(r["zip"], (v[0], v[1], "approximate: another post office of this pincode"))
+    in_n = collections.Counter()
     for sheet, c in by_sheet.items():
         ws = wb[sheet]; iso = ISO2.get(c["name"]); batch = []
         it = ws.iter_rows(min_row=4, values_only=True)
@@ -341,7 +351,14 @@ def main():
                 batch.append((c["name"], iso, s(r[3]), s(r[2]), s(r[1]), "", "", lat, lon, json.dumps(extra, ensure_ascii=False)))
             else:
                 if len(r) < 11 or not s(r[1]): continue
-                batch.append((c["name"], iso, s(r[1]), s(r[2]), s(r[3]), s(r[5]), s(r[7]), num(r[9]), num(r[10]), None))
+                lat, lon, extra = num(r[9]), num(r[10]), None
+                if iso == "IN" and lat is None:
+                    v = in_pts.get((s(r[1]), s(r[2]).lower(), s(r[5]).lower())) or in_zip.get(s(r[1]))
+                    if v:
+                        lat, lon = v[0], v[1]
+                        if v[2]: extra = json.dumps({"Point": v[2]})
+                    in_n["matched" if v else "missing"] += 1
+                batch.append((c["name"], iso, s(r[1]), s(r[2]), s(r[3]), s(r[5]), s(r[7]), lat, lon, extra))
             if len(batch) >= 50000:
                 con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
                 total += len(batch); batch = []
@@ -359,6 +376,7 @@ def main():
         con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
         total += len(batch)
         print(f"  {sheet}: done ({total:,} total, {round(time.time() - t0)}s)")
+        if iso == "IN" and in_n: print(f"  India: {in_n['matched']:,} rows placed from {os.path.basename(IN_PINCODES)}, {in_n['missing']:,} without a point")
 
     # UK: every live postcode -> its point (data/uk_postcodes.csv.gz, scripts/build_uk_postcodes.py), for exact lookups;
     # the zips table keeps the postcode districts
