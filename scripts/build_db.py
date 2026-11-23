@@ -44,10 +44,13 @@ UK_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcode_ar
 # scripts/estimate_population.py. Only the countries in POP_RELEASED get them (released region by region).
 ZIP_POP = os.path.join(os.path.dirname(__file__), "..", "data", "zip_population.csv.gz")
 HH_SIZE = os.path.join(os.path.dirname(__file__), "..", "data", "household_size.csv")
+BR_OCCUPIED = 72_400_000  # occupied private households, IBGE Census 2022
 POP_RELEASED = {
     # Europe
     "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IS", "IT", "LT",
     "LU", "LV", "MC", "MT", "NL", "NO", "PL", "PT", "RO", "RS", "RU", "SE", "SI", "SK", "TR",
+    # Americas
+    "AR", "BR", "CA", "CL", "CO", "CR", "DO", "EC", "GT", "MX", "PA", "PE", "PR", "US", "UY",
 }
 
 
@@ -407,7 +410,9 @@ CHUNK_BYTES = PAGE_SIZE
 
 def add_population(con):
     """zips.pop / zips.hh: estimated people and households per zip row. Real figures win where the data has them:
-    US ZIP population (workbook), Brazil households per CEP (census addresses). UK districts get none (their postcode
+    US ZIP population (workbook), Brazil per CEP from its census dwellings (CEPs are far denser than the 1 km population
+    grid): households = dwellings scaled to the 72.4 M occupied households of the 2022 census (the address file also
+    counts empty and occasional-use dwellings), people = households x the census average household size. UK districts get none (their postcode
     sectors carry the people), so totals over a radius or region never count anyone twice."""
     con.execute("ALTER TABLE zips ADD COLUMN pop INT")
     con.execute("ALTER TABLE zips ADD COLUMN hh INT")
@@ -418,6 +423,7 @@ def add_population(con):
         for r in csv.DictReader(fh):
             if r["iso2"] in POP_RELEASED: est[(r["iso2"], r["zip"], float(r["lat"]), float(r["lon"]))] = int(r["pop"])
     upd, miss = [], collections.Counter()
+    br_dwellings = sum(json.loads(ex).get("Households", 0) for (ex,) in con.execute("SELECT extra FROM zips WHERE iso2 = 'BR' AND extra LIKE '%Households%'")) or 1
     for i, iso, z, la, lo, ex in con.execute("SELECT id, iso2, zip, lat, lon, extra FROM zips WHERE lat IS NOT NULL"):
         if iso not in POP_RELEASED: continue
         e = json.loads(ex) if ex else {}
@@ -426,7 +432,10 @@ def add_population(con):
         if p is None:
             if iso != "GB" or e.get("Level") == "postcode sector": miss[iso] += 1
             continue
-        h = e.get("Households") if iso == "BR" and "Households" in e else (round(p / size[iso]) if iso in size else None)
+        if iso == "BR" and "Households" in e:
+            h = round(e["Households"] * BR_OCCUPIED / br_dwellings); p = round(h * size["BR"])
+        else:
+            h = round(p / size[iso]) if iso in size else None
         upd.append((p, h, i))
     con.executemany("UPDATE zips SET pop = ?, hh = ? WHERE id = ?", upd)
     con.execute("INSERT OR REPLACE INTO meta VALUES('pop_countries', ?)", (json.dumps(sorted(POP_RELEASED)),))

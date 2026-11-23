@@ -3,7 +3,9 @@
 Usage:  python scripts/estimate_population.py data/popgrid [ISO2 ...]
 
 Each zip point gets the people living closer to it than to any other zip point of the same country (the country's
-area split into "nearest point" cells, cut at the border). Zip rows that share a point share its people equally.
+area split into "nearest point" cells, cut at the border). Where zip points are denser than the grid (city streets,
+buildings), a grid cell holding several zip points splits its people equally between them instead. Zip rows that
+share a point share its people equally.
 UK: only the postcode sectors are used (the districts contain them), and not the sectors without any ordinary address
 (PO boxes and large businesses only, small_users = 0 in data/uk_postcode_areas.csv.gz). Cells more than MAX_KM from every zip point of
 their country stay unassigned (e.g. French overseas departments, which have no zip points in the workbook).
@@ -101,7 +103,11 @@ def main(folder, only):
         pts = collections.defaultdict(list)
         for z, la, lo in rows: pts[(la, lo)].append(z)
         keys = list(pts)
-        tree = cKDTree(unit(np.array([k[0] for k in keys]), np.array([k[1] for k in keys])))
+        klat, klon = np.array([k[0] for k in keys]), np.array([k[1] for k in keys])
+        tree = cKDTree(unit(klat, klon))
+        # grid cell of each point, to split a cell between the points inside it
+        site_cell = np.floor((klat - y0) / dy).astype(np.int64) * grid.width + np.floor((klon - x0) / dx).astype(np.int64)
+        order = np.argsort(site_cell, kind="stable"); sc = site_cell[order]
         feats = [f for f in ne if f["properties"].get("ISO_A2_EH") == iso or f["properties"].get("ADM0_A3") in EXTRA_UNITS.get(iso, ())]
         if not feats: print(f"{iso}: no Natural Earth border, skipped"); continue
         polys = polygons(feats)
@@ -125,10 +131,19 @@ def main(folder, only):
                 if not m.any(): continue
                 ri, cj = np.nonzero(m); v = pop[ri, cj]
                 lat = y0 + (rr + ri + 0.5) * dy; lon = x0 + (cc + cj + 0.5) * dx
+                gid = (rr + ri).astype(np.int64) * grid.width + (cc + cj)
+                lo_, hi_ = np.searchsorted(sc, gid, "left"), np.searchsorted(sc, gid, "right")
+                n = hi_ - lo_; has = n > 0
+                if has.any():  # cells with zip points inside: split equally between them
+                    cnt = n[has]; offs = np.repeat(lo_[has] - np.cumsum(cnt) + cnt, cnt) + np.arange(cnt.sum())
+                    acc += np.bincount(order[offs], weights=np.repeat(v[has] / cnt, cnt), minlength=len(keys))
+                total += v.sum()
+                lat, lon, v = lat[~has], lon[~has], v[~has]
+                if not len(v): continue
                 d, idx = tree.query(unit(lat, lon), distance_upper_bound=chord)
                 ok = np.isfinite(d)
                 acc += np.bincount(idx[ok], weights=v[ok], minlength=len(keys))
-                total += v.sum(); unassigned += v[~ok].sum()
+                unassigned += v[~ok].sum()
         for k, (la, lo) in enumerate(keys):
             share = acc[k] / len(pts[(la, lo)])
             for z in pts[(la, lo)]: rows_out.append([iso, z, la, lo, int(round(share))])

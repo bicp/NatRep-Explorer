@@ -255,10 +255,12 @@ wrong point and were left as they are.
 Radius and area results show the estimated people and households of each zip and their total. Each zip point gets
 the people living closer to it than to any other zip point of its country (cut at the border), from the
 [GHSL](https://human-settlement.emergency.copernicus.eu/download.php?ds=pop) 2025 population grid (EU JRC, ~1 km cells,
-CC BY 4.0); zip rows at the same point share it equally. Households = people / the country's latest average household
+CC BY 4.0); where zip points are denser than the grid (city streets, buildings), a grid cell holding several of them
+splits its people equally between them, and zip rows at the same point share it equally. Households = people / the country's latest average household
 size in the [UN Database on Household Size and Composition 2026](https://population.un.org/Household/)
-(`data/household_size.csv`). Real figures replace the estimate where the data has them: US ZIP population (workbook)
-and Brazil households per CEP (2022 census addresses). UK: the postcode sectors carry the people and the districts
+(`data/household_size.csv`). Real figures replace the estimate where the data has them: US ZIP population (workbook);
+Brazil per CEP from its 2022 census dwellings, scaled to the census's 72.4 M occupied households (the address file
+also counts empty and occasional-use dwellings), people = households × 2.79 (census average). UK: the postcode sectors carry the people and the districts
 none, so totals never count anyone twice.
 
 Checked against the US census ZIP populations: the national total is within 4% and the median zip is right, but only
@@ -266,7 +268,7 @@ about half of single zips are within 25% (a zip's real area is not its "nearest 
 radius or a region; a single zip's figure is rough. Countries with few zip points (one per town or region) get large,
 rough areas. Countries without zip coordinates (India) have none.
 
-The countries shown are listed in `POP_RELEASED` in `scripts/build_db.py`. To recompute (all countries in ~3 minutes,
+Released so far: Europe and the Americas. The countries shown are listed in `POP_RELEASED` in `scripts/build_db.py`. To recompute (all countries in ~3 minutes,
 or only the ISO2 codes given), download into `data/popgrid/` (not in git) the GHSL file
 `GHS_POP_E2025_GLOBE_R2023A_4326_30ss_V1_0.tif` (480 MB zip), Natural Earth's `ne_10m_admin_0_countries.geojson`
 and the UN `UNDESA_PD_2026_hh-size-composition.xlsx`, then run and rebuild the database:
