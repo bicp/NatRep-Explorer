@@ -51,6 +51,7 @@ POP_RELEASED = {
     "LU", "LV", "MC", "MT", "NL", "NO", "PL", "PT", "RO", "RS", "RU", "SE", "SI", "SK", "TR",
     # Americas
     "AR", "BR", "CA", "CL", "CO", "CR", "DO", "EC", "GT", "MX", "PA", "PE", "PR", "US", "UY",
+    # Asia-Pacific\n    "AU", "CN", "JP", "KR", "NZ", "PH", "SG", "TH",
 }
 
 
