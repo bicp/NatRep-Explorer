@@ -41,6 +41,10 @@ BR_MUN = os.path.join(os.path.dirname(__file__), "..", "data", "br_municipios.cs
 UK_POSTCODES = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcodes.csv.gz")
 UK_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "uk_postcode_areas.csv.gz")
 IN_PINCODES = os.path.join(os.path.dirname(__file__), "..", "data", "in_pincodes.csv.gz")  # scripts/build_in_pincodes.py
+# the same rows with every point moved inside its pincode's India Post boundary, and people per pincode area
+# (scripts/build_in_boundaries.py); used instead of in_pincodes.csv.gz when present
+IN_POINTS = os.path.join(os.path.dirname(__file__), "..", "data", "in_pincode_points.csv.gz")
+IN_AREAS = os.path.join(os.path.dirname(__file__), "..", "data", "in_pincode_areas.csv.gz")
 # Estimated people around each zip point (GHSL 2025 population grid) and UN average household sizes, written by
 # scripts/estimate_population.py. Only the countries in POP_RELEASED get them (released region by region).
 ZIP_POP = os.path.join(os.path.dirname(__file__), "..", "data", "zip_population.csv.gz")
@@ -59,6 +63,8 @@ POP_RELEASED = {
     "AU", "CN", "JP", "KR", "NZ", "PH", "SG", "TH",
     # Africa
     "MA", "ZA",
+    # India: people per pincode from India Post's pincode boundaries (not the nearest-point estimate)
+    "IN",
 }
 
 
@@ -326,8 +332,9 @@ def main():
     br_mun = {r["codigo_ibge"]: r["nome"] for r in csv.DictReader(open(BR_MUN, encoding="utf-8"))} if os.path.exists(BR_MUN) else {}
     # India: the tab has no coordinates; GeoNames' points by (pincode, place, district), else the pincode's first point
     in_pts, in_zip = {}, {}
-    if os.path.exists(IN_PINCODES):
-        with gzip.open(IN_PINCODES, "rt", encoding="utf-8") as fh:
+    in_src = IN_POINTS if os.path.exists(IN_POINTS) else IN_PINCODES
+    if os.path.exists(in_src):
+        with gzip.open(in_src, "rt", encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
                 v = (float(r["lat"]), float(r["lon"]), r["point"])
                 in_pts.setdefault((r["zip"], r["place"].lower(), r["admin2"].lower()), v)
@@ -379,7 +386,7 @@ def main():
         con.executemany("INSERT INTO zips(country,iso2,zip,place,admin1,admin2,admin3,lat,lon,extra) VALUES(?,?,?,?,?,?,?,?,?,?)", batch)
         total += len(batch)
         print(f"  {sheet}: done ({total:,} total, {round(time.time() - t0)}s)")
-        if iso == "IN" and in_n: print(f"  India: {in_n['matched']:,} rows placed from {os.path.basename(IN_PINCODES)}, {in_n['missing']:,} without a point")
+        if iso == "IN" and in_n: print(f"  India: {in_n['matched']:,} rows placed from {os.path.basename(in_src)}, {in_n['missing']:,} without a point")
 
     # UK: every live postcode -> its point (data/uk_postcodes.csv.gz, scripts/build_uk_postcodes.py), for exact lookups;
     # the zips table keeps the postcode districts
@@ -448,12 +455,20 @@ def add_population(con):
     with gzip.open(ZIP_POP, "rt", encoding="utf-8", newline="") as fh:
         for r in csv.DictReader(fh):
             if r["iso2"] in POP_RELEASED: est[(r["iso2"], r["zip"], float(r["lat"]), float(r["lon"]))] = int(r["pop"])
+    in_people = {}
+    if os.path.exists(IN_AREAS):
+        with gzip.open(IN_AREAS, "rt", encoding="utf-8") as fh: in_people = {r["pincode"]: int(r["people"]) for r in csv.DictReader(fh)}
+    in_rows = collections.Counter(z for (z,) in con.execute("SELECT zip FROM zips WHERE iso2 = 'IN'"))
     uk = {r["sector"]: (int(r["people"]), int(r["households"])) for r in csv.DictReader(open(UK_CENSUS, encoding="utf-8"))} if os.path.exists(UK_CENSUS) else {}
     upd, miss = [], collections.Counter()
     br_dwellings = sum(json.loads(ex).get("Households", 0) for (ex,) in con.execute("SELECT extra FROM zips WHERE iso2 = 'BR' AND extra LIKE '%Households%'")) or 1
     for i, iso, z, la, lo, ex in con.execute("SELECT id, iso2, zip, lat, lon, extra FROM zips WHERE lat IS NOT NULL"):
         if iso not in POP_RELEASED: continue
         e = json.loads(ex) if ex else {}
+        if iso == "IN":  # people inside the pincode's India Post boundary, split between its post offices
+            if z in in_people:
+                p = round(in_people[z] / in_rows[z]); upd.append((p, round(p / size["IN"]) if "IN" in size else None, i))
+            continue
         if iso == "GB" and uk:
             if e.get("Level") == "postcode sector" and z in uk: upd.append((*uk[z], i))
             continue
