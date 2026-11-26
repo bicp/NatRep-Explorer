@@ -167,6 +167,53 @@
 
   const ftsQuery = (q) => (q.match(/[\p{L}\p{N}_]+/gu) || []).map((t) => `"${t}"*`).join(" ");
 
+  // state / province abbreviations people write next to a zip ("NSW 2010", "CA 90210", "ON K1A")
+  const STATE_ABBR = {
+    // Australia
+    NSW: "New South Wales", VIC: "Victoria", QLD: "Queensland", SA: "South Australia", WA: "Western Australia",
+    TAS: "Tasmania", NT: "Northern Territory", ACT: "Australian Capital Territory",
+    // United States
+    AL: "Alabama", AK: "Alaska", AS: "American Samoa", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado",
+    CT: "Connecticut", DE: "Delaware", DC: "District of Columbia", FL: "Florida", GA: "Georgia", GU: "Guam", HI: "Hawaii",
+    ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine",
+    MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana",
+    NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
+    NC: "North Carolina", ND: "North Dakota", MP: "Northern Mariana Islands", OH: "Ohio", OK: "Oklahoma", OR: "Oregon",
+    PA: "Pennsylvania", PR: "Puerto Rico", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee",
+    TX: "Texas", UT: "Utah", VT: "Vermont", VI: "Virgin Islands", VA: "Virginia", WV: "West Virginia",
+    WI: "Wisconsin", WY: "Wyoming",
+    // Canada
+    AB: "Alberta", BC: "British Columbia", MB: "Manitoba", NB: "New Brunswick", NL: "Newfoundland and Labrador",
+    NS: "Nova Scotia", NU: "Nunavut Territory", ON: "Ontario", PE: "Prince Edward Island", QC: "Quebec",
+    SK: "Saskatchewan", YT: "Yukon",
+  };
+  const STATE_ABBR2 = { WA: ["Western Australia", "Washington"], NT: ["Northern Territory", "Northwest Territory"] };
+  const fold = (v) => String(v || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
+  // "NSW 2010", "2010 New South Wales", "Surry Hills 2010", "Beverly Hills, CA 90210": the part with digits is the
+  // zip, every other word must match the state (name or abbreviation), the province, the place or the country
+  async function zipWithWords(q, country) {
+    const tokens = q.split(/[\s,;]+/).filter(Boolean);
+    const zipT = tokens.filter((t) => /\d/.test(t)), words = tokens.filter((t) => !/\d/.test(t));
+    if (zipT.length !== 1 || !words.length) return [];
+    const zq = zipT[0].replace(/-/g, "").replace(/[%_]/g, "");
+    const cw = country ? " AND country = ?" : "", ca = country ? [country] : [], cand = [];
+    for (const len of META.zip_lens.filter((l) => l >= zq.length)) {
+      cand.push(...await rows(`SELECT id, ${COLS} FROM zips WHERE zip_len = ? AND zip_norm LIKE ?${cw} ORDER BY zip_norm LIMIT ?`,
+        [len, zq + "%", ...ca, 2000 - cand.length]));
+      if (cand.length >= 2000) break;
+    }
+    const ok = (r, w) => {
+      const abbr = STATE_ABBR2[w.toUpperCase()] || (STATE_ABBR[w.toUpperCase()] ? [STATE_ABBR[w.toUpperCase()]] : []);
+      if (abbr.length) return abbr.includes(r.admin1) || fold(r.iso2) === fold(w);  // a known abbreviation: that state only
+      // other words: the start of a word of the place, province, state or country (short words must match whole)
+      const fw = fold(w);
+      return [r.place, r.admin1, r.admin2, r.admin3, r.country, r.iso2].some((v) => fold(v).split(/[^\p{L}\p{N}]+/u)
+        .some((x) => (fw.length < 3 ? x === fw : x.startsWith(fw))));
+    };
+    return cand.filter((r) => words.every((w) => ok(r, w))).slice(0, 60);
+  }
+
   async function search(q, country, limit = 60) {
     q = q.trim();
     const cw = country ? " AND country = ?" : "", ca = country ? [country] : [];
@@ -180,6 +227,9 @@
         [len, zq + "%", ...ca, limit - results.length]));
       if (results.length >= limit) break;
     }
+    // zip written with a state or place ("NSW 2010"): no zip starts with the whole text, so split it
+    let zipWords = false;
+    if (!results.length && /\d/.test(q) && /[\s,;]/.test(q)) { results.push(...await zipWithWords(q, country)); zipWords = results.length > 0; }
     // 2) cities / places: exact name first, then FTS prefix matches by number of zips (places are stored in that order)
     const ft = ftsQuery(q);
     let places = [];
@@ -196,7 +246,7 @@
     const regions = [];
     if (q.length >= 2) for (const level of ["admin1", "admin2"])
       regions.push(...await rows(`SELECT country, level, value, n FROM regions WHERE level = ? AND value LIKE ?${cw} ORDER BY n DESC LIMIT 8`, [level, q + "%", ...ca]));
-    return { results, places, regions: regions.slice(0, 12) };
+    return { results, places, regions: regions.slice(0, 12), zipWords };
   }
 
   function haversine(lat1, lon1, lat2, lon2) {
@@ -668,7 +718,7 @@
     try { d = await search(q, country, 40); }
     catch (e) { if (seq === searchSeq) box.innerHTML = `<p class="hint">Search failed: ${esc(e.message)}</p>`; return; }
     if (seq !== searchSeq) return;
-    let zipHits = d.results.filter((r) => r.zip.replace(/[\s-]/g, "").toLowerCase().startsWith(q.replace(/[\s-]/g, "").toLowerCase()));
+    let zipHits = d.zipWords ? d.results : d.results.filter((r) => r.zip.replace(/[\s-]/g, "").toLowerCase().startsWith(q.replace(/[\s-]/g, "").toLowerCase()));
     let html = "";
     // a full UK postcode (SS2 6BH): its own point from the ONS Postcode Directory (uk_postcodes), then its sector (SS2 6)
     // and district (SS2), which are what the zip list has, the district at its ONS centre; if the postcode isn't there
